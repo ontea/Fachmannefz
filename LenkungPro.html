@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LenkungPRO – Spickzettel (1.–2. Lehrjahr)</title>
+  <meta name="description" content="Lenkung: Aufgabe, Bauarten (Achsschenkel/Zahnstange), Lenkübersetzung, variable Übersetzung, Überlagerungslenkung, Servo (hydraulisch/EHPS/EPS) + Rechner & Notizen.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <style>
+    /* ========= Light Mode Lesbarkeit (wie FelgenPRO) ========= */
+    [data-theme="light"] body { color: rgba(15,23,42,0.92); }
+    [data-theme="light"] .liquid-glass{
+      background: rgba(255,255,255,0.70) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.10) !important;
+      color: rgba(15,23,42,0.92) !important;
+    }
+    [data-theme="light"] .text-white{ color: rgba(15,23,42,0.92) !important; }
+    [data-theme="light"] .text-white\/90{ color: rgba(15,23,42,0.90) !important; }
+    [data-theme="light"] .text-white\/85{ color: rgba(15,23,42,0.85) !important; }
+    [data-theme="light"] .text-white\/80{ color: rgba(15,23,42,0.80) !important; }
+    [data-theme="light"] .text-white\/75{ color: rgba(15,23,42,0.78) !important; }
+    [data-theme="light"] .text-white\/70{ color: rgba(15,23,42,0.70) !important; }
+    [data-theme="light"] .text-white\/60{ color: rgba(15,23,42,0.60) !important; }
+
+    [data-theme="light"] .bg-white\/5{ background: rgba(2,6,23,0.04) !important; }
+    [data-theme="light"] .border-white\/10{ border-color: rgba(15,23,42,0.14) !important; }
+    [data-theme="light"] .focus\:border-white\/20:focus{ border-color: rgba(15,23,42,0.22) !important; }
+    [data-theme="light"] .focus\:ring-white\/10:focus{ --tw-ring-color: rgba(2,6,23,0.10) !important; }
+
+    [data-theme="light"] .lg-badge,
+    [data-theme="light"] .lg-chip{
+      background: rgba(2,6,23,0.06) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      color: rgba(15,23,42,0.78) !important;
+    }
+
+    .hidden{ display:none !important; }
+    .scroll-mt-24 { scroll-margin-top: 7rem; }
+
+    /* Inputs */
+    .calc-input{
+      width:100%;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    .calc-input:focus{
+      border-color: rgba(255,255,255,0.20);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+    }
+    [data-theme="light"] .calc-input{
+      background: rgba(2,6,23,0.04) !important;
+      color: rgba(15,23,42,0.92) !important;
+      border-color: rgba(15,23,42,0.14) !important;
+    }
+    [data-theme="light"] .calc-input:focus{
+      border-color: rgba(15,23,42,0.22) !important;
+      box-shadow: 0 0 0 3px rgba(2,6,23,0.08) !important;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+    }
+    [data-theme="light"] .pill{
+      border-color: rgba(15,23,42,0.12);
+      background: rgba(2,6,23,0.04);
+    }
+
+    /* Details (wie Lenkgeometrie) */
+    details.lg-details > summary{
+      list-style:none;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    html[data-theme="light"] details.lg-details > summary{
+      background: rgba(255,255,255,0.70);
+      border-color: rgba(0,0,0,0.10);
+    }
+    details.lg-details[open] > summary{
+      background: rgba(107,114,128,0.18);
+      border-color: rgba(107,114,128,0.35);
+    }
+    details.lg-details > summary::-webkit-details-marker{ display:none; }
+
+    /* Mini code blocks */
+    pre.mini{
+      margin:0;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      overflow:auto;
+      color: rgba(255,255,255,0.86);
+      font-size: 12.5px;
+      line-height: 1.35;
+      white-space: pre;
+    }
+    html[data-theme="light"] pre.mini{
+      background: rgba(2,6,23,0.04);
+      color: rgba(15,23,42,0.88);
+      border-color: rgba(15,23,42,0.10);
+    }
+
+    .mini-note{ font-size: 12px; opacity: .82; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    /* Print */
+    @media print{
+      .no-print{ display:none !important; }
+      .page-wrap{ padding-bottom: 0 !important; }
+      #scrollProgress{ display:none !important; }
+      body{ background:#fff !important; color:#111 !important; }
+      a{ color:#111 !important; text-decoration:none !important; }
+      pre.mini{ border: 1px solid #ddd !important; background:#f7f7f7 !important; color:#111 !important; }
+    }
+  </style>
+</head>
+
+<body class="app">
+  <!-- SVG Filter: “liquid / distortion” -->
+  <svg class="svg-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="glass-distortion">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <main class="page-wrap">
+    <div class="max-w-5xl mx-auto p-5">
+
+      <!-- Widgets (wie FelgenPRO) -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="calendar" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Datum</p>
+              <div class="font-extrabold" id="date">–</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="clock" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Zeit</p>
+              <div class="font-extrabold" id="time">–</div>
+            </div>
+          </div>
+
+          <div class="lg-divider"></div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="cloud" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Weather · Bern</p>
+              <div class="font-extrabold"><span id="wxText">–</span> · <span id="wxTemp">–°C</span></div>
+            </div>
+          </div>
+
+          <div class="lg-divider hidden md:block"></div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 hidden md:flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="alert-triangle" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Merksatz</p>
+              <div class="font-extrabold">Lenkung = Rückmeldung + Stabilität + Sicherheit.</div>
+            </div>
+          </div>
+
+          <div class="ml-auto flex flex-wrap gap-2 no-print">
+            <button id="printBtn" class="lg-btn" type="button">
+              <i data-feather="printer" class="w-4 h-4"></i><span>Drucken/PDF</span>
+            </button>
+            <button id="exportNotesBtn" class="lg-btn" type="button">
+              <i data-feather="download" class="w-4 h-4"></i><span>Notizen export</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search (wie FelgenPRO) -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6 sticky top-2 md:top-4 z-20 no-print">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="relative flex-1 min-w-[220px]">
+            <i data-feather="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4"></i>
+            <input id="q" type="search" placeholder="LenkungPRO durchsuchen..."
+              class="w-full bg-white/5 text-white border border-white/10 rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10">
+          </div>
+
+          <div class="flex gap-2">
+            <button id="viewCards" aria-pressed="true" class="lg-btn">
+              <i data-feather="grid" class="w-4 h-4"></i><span>Karten</span>
+            </button>
+            <button id="viewList" aria-pressed="false" class="lg-btn">
+              <i data-feather="list" class="w-4 h-4"></i><span>Liste</span>
+            </button>
+          </div>
+
+          <a href="#uebersetzung" class="lg-btn">
+            <i data-feather="cpu" class="w-4 h-4"></i><span>Rechner</span>
+          </a>
+          <a href="#lenkkraft" class="lg-btn">
+            <i data-feather="activity" class="w-4 h-4"></i><span>Lenkkraft</span>
+          </a>
+
+
+          <a href="#notizen" class="lg-btn">
+            <i data-feather="edit-3" class="w-4 h-4"></i><span>Notizen</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Overview -->
+      <section id="overview" class="scroll-mt-24">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl sm:text-3xl font-bold">LenkungPRO</h1>
+          <span class="pill text-xs text-white/60">
+            <i data-feather="award" class="w-4 h-4"></i>
+            <span>Für 1.–2. Lehrjahr (Auto)</span>
+          </span>
+        </div>
+
+        <!-- 30s spickzettel -->
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5 mb-4">
+          <h2 class="text-lg font-bold mb-2 flex items-center gap-2">
+            <i data-feather="zap" class="w-5 h-5"></i><span>30‑Sekunden‑Spickzettel</span>
+          </h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Aufgabe:</b> Fahrerwunsch → <b>Radlenkwinkel</b>, dabei stabil, leicht, sicher.</li>
+                <li><b>Lenkübersetzung i:</b> <b>Lenkradwinkel / Radwinkel</b> (kleiner i = direkter).</li>
+                <li><b>Zahnstange:</b> Ritzel dreht → Zahnstange schiebt → Spurstangen lenken Räder.</li>
+                <li><b>Achsschenkel‑Lenkung:</b> Lenkgetriebe + Hebel + Gestänge (robust).</li>
+              </ul>
+            </div>
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Variabel:</b> Mitte indirekter (stabil), am Rand direkter (Parken).</li>
+                <li><b>Überlagerung:</b> System lenkt <b>zusätzlich</b> mit (Stabilität/Assistenz).</li>
+                <li><b>Hydraulik:</b> Pumpe + Ventil + Zylinder. <b>EHPS:</b> Pumpe elektrisch geregelt.</li>
+                <li><b>EPS:</b> Sensoren + ECU + E‑Motor (kein Öl, Assistenz möglich).</li>
+              </ul>
+            </div>
+          </div>
+          <p class="mini-note lg-muted mt-3">Wenn du’s nicht in 2 Sätzen erklären kannst, ist es noch kein Spickzettel.</p>
+        </div>
+
+        <!-- Cards -->
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="aufgabe">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="target" class="w-4 h-4"></i><span class="text-sm">Grundlagen</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Aufgabe der Lenkung</h3>
+            <p class="text-white/75 m-0">Was sie leisten muss.</p>
+            <a class="lg-open mt-auto" href="#aufgabe">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="bauarten">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="layers" class="w-4 h-4"></i><span class="text-sm">Mechanik</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Bauarten</h3>
+            <p class="text-white/75 m-0">Achsschenkel‑ & Zahnstangenlenkung.</p>
+            <a class="lg-open mt-auto" href="#bauarten">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="uebersetzung">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="cpu" class="w-4 h-4"></i><span class="text-sm">Rechnen</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Lenkübersetzung</h3>
+            <p class="text-white/75 m-0">Formel + Rechner + Beispiele.</p>
+            <a class="lg-open mt-auto" href="#uebersetzung">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="lenkkraft">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="activity" class="w-4 h-4"></i><span class="text-sm">Rechnen</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Betätigungskraft</h3>
+            <p class="text-white/75 m-0">Lenkkraft am Lenkrad (wie im Schulblatt).</p>
+            <a class="lg-open mt-auto" href="#lenkkraft">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="variabel">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="sliders" class="w-4 h-4"></i><span class="text-sm">Technik</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Variable Übersetzung</h3>
+            <p class="text-white/75 m-0">Warum progressiv Sinn macht.</p>
+            <a class="lg-open mt-auto" href="#variabel">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="ueberlagerung">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="shuffle" class="w-4 h-4"></i><span class="text-sm">Assistenz</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Überlagerungslenkung</h3>
+            <p class="text-white/75 m-0">Aufgaben & Nutzen.</p>
+            <a class="lg-open mt-auto" href="#ueberlagerung">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="hydro">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="droplet" class="w-4 h-4"></i><span class="text-sm">Servo</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Hydraulik & EHPS</h3>
+            <p class="text-white/75 m-0">Aufbau + Schema.</p>
+            <a class="lg-open mt-auto" href="#hydro">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="eps">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="zap" class="w-4 h-4"></i><span class="text-sm">Servo</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Elektrische Lenkhilfe (EPS)</h3>
+            <p class="text-white/75 m-0">Aufbau + Varianten.</p>
+            <a class="lg-open mt-auto" href="#eps">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="notizen">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="edit-3" class="w-4 h-4"></i><span class="text-sm">Dein Zeug</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Eigene Notizen</h3>
+            <p class="text-white/75 m-0">Speichern + Export.</p>
+            <a class="lg-open mt-auto" href="#notizen">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+        </div>
+
+        <div id="empty" class="text-white/75 text-center p-4 border border-dashed border-white/10 rounded-xl hidden mt-4" aria-live="polite">
+          Keine Treffer.
+        </div>
+      </section>
+
+      <!-- ====================== CONTENT ====================== -->
+
+      <!-- Aufgabe -->
+      <section id="aufgabe" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="target" class="w-5 h-5"></i><span>Aufgabe einer Lenkung</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Was muss sie leisten?</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Richtungsänderung:</b> Lenkradbewegung → definierter <b>Radlenkwinkel</b>.</li>
+                <li><b>Spur halten:</b> guter Geradeauslauf, stabil bei Tempo.</li>
+                <li><b>Selbstzentrierung:</b> nach Kurve Lenkrad läuft (teilweise) zurück.</li>
+                <li><b>Rückmeldung:</b> Grip/Untergrund spürbar, Schläge trotzdem gedämpft.</li>
+                <li><b>Leichtgängigkeit:</b> Rangieren ohne Kraftakt.</li>
+                <li><b>Sicherheit:</b> Spielarmut, robuste Gelenke, kollabierbare Lenksäule (Crash).</li>
+              </ul>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Typische Checks in der Praxis</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Spiel:</b> Lenkradspiel, Spurstangenköpfe, Axialgelenke, Lenkgetriebe.</li>
+                <li><b>Dichtheit:</b> Servoöl, Leitungen, Manschetten.</li>
+                <li><b>Geräusche:</b> Pumpenheulen, Knacken, Schleifen (Lager/Getriebe).</li>
+                <li><b>Rückstellmoment:</b> kommt das Lenkrad sauber zurück?</li>
+                <li><b>Reifen/Spur:</b> Reifendruck & Achsgeometrie zuerst prüfen.</li>
+              </ul>
+              <p class="mini-note lg-muted mt-3">Reality‑Check: „Lenkung kaputt“ ist oft einfach falscher Reifendruck oder Spur verstellt.</p>
+            </div>
+          </div>
+
+          <div class="mt-4 liquid-glass lg-surface lg-radius-lg p-4">
+            <details class="lg-details">
+              <summary><i data-feather="help-circle" class="w-4 h-4"></i>Mini‑Karteikarten</summary>
+              <div class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                  <div class="text-xs text-white/60 mb-1">Frage</div>
+                  <div class="font-extrabold">Warum Rückmeldung?</div>
+                  <div class="mt-2 text-sm text-white/85">
+                    Damit du Grip & Radstellung spürst. Ohne Feedback wird’s „blind“ und unsicher.
+                  </div>
+                </div>
+                <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                  <div class="text-xs text-white/60 mb-1">Frage</div>
+                  <div class="font-extrabold">Warum nicht ultraleicht?</div>
+                  <div class="mt-2 text-sm text-white/85">
+                    Zu wenig Rückstellmoment/Dämpfung = nervös, mehr Korrekturen, schlechter Geradeauslauf.
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Aufgabe)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="aufgabe" placeholder="Eigene Merksätze, Beispiele aus der Werkstatt, Prüfungsfragen..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bauarten -->
+      <section id="bauarten" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="layers" class="w-5 h-5"></i><span>Bauarten: Achsschenkellenkung & Zahnstangenlenkung</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Achsschenkellenkung (Lenkgetriebe + Gestänge)</h3>
+              <p class="text-sm text-white/85 m-0">
+                Das Lenkgetriebe bewegt über Hebel ein Gestänge (Spurstangen) und dreht die Achsschenkel.
+                Häufig bei <b>starrer Achse</b> / robusten Aufbauten.
+              </p>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Bauarten (vereinfacht)</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>Kreuzlenkung:</b> Draglink lenkt einen Achsschenkel, Spurstange koppelt links/rechts.</li>
+                  <li><b>Parallelogramm:</b> Pitman‑Arm + Umlenkhebel, Gestänge bleibt „parallel“ zur Achse.</li>
+                </ul>
+              </div>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Schema</div>
+<pre class="mini">Lenkrad → Lenksäule → Lenkgetriebe → Pitman-Arm
+                         ↓
+                    Draglink / Umlenkung
+                         ↓
+                   Spurstange (L ↔ R)
+                         ↓
+                Achsschenkelhebel → Räder</pre>
+              </div>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Zahnstangenlenkung (Rack‑and‑Pinion)</h3>
+              <p class="text-sm text-white/85 m-0">
+                Standard bei PKW: <b>Ritzel</b> dreht, bewegt die <b>Zahnstange</b> seitlich.
+                Über <b>Spurstangen</b> werden die Räder gelenkt.
+              </p>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Bauarten (vereinfacht)</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>Front/Rear‑Steer:</b> Zahnstange vor oder hinter der Achse (Packaging/Geometrie).</li>
+                  <li><b>Mechanisch oder mit Servo:</b> Hydraulik/EHPS/EPS (siehe unten).</li>
+                  <li><b>Progressiv:</b> variable Übersetzung über Zahnteilung (siehe „Variabel“).</li>
+                </ul>
+              </div>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Schema</div>
+<pre class="mini">Lenkrad → Lenksäule → Pinion (Ritzel)
+                      ↓ greift in
+                 Zahnstange  ⇆  (links/rechts)
+                      ↓
+              Spurstangen → Achsschenkel → Räder</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 liquid-glass lg-surface lg-radius-lg p-4">
+            <h3 class="font-bold mb-2">Vergleich (Prüfungs‑Version)</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Zahnstange</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li>direktes Lenkgefühl</li>
+                  <li>kompakt, leicht</li>
+                  <li>meist PKW</li>
+                </ul>
+              </div>
+              <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Achsschenkel</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li>robust</li>
+                  <li>Gestänge flexibel</li>
+                  <li>oft starr/Truck</li>
+                </ul>
+              </div>
+              <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Wichtig</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li>Spielarmut</li>
+                  <li>Bump‑Steer vermeiden</li>
+                  <li>Manschetten/Gelenke ok</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Bauarten)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="bauarten" placeholder="Welche Bauart siehst du in der Werkstatt am häufigsten? typische Defekte?"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lenkübersetzung -->
+      <section id="uebersetzung" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="cpu" class="w-5 h-5"></i><span>Lenkübersetzungen berechnen</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Definition</h3>
+              <p class="text-sm text-white/85 m-0">
+                <b>Lenkübersetzung i</b> = Verhältnis aus <b>Lenkradwinkel</b> zu <b>Radlenkwinkel</b>.
+              </p>
+
+              <div class="mt-3">
+<pre class="mini">i = α / δ
+
+α = Lenkradwinkel (°) = Umdrehungen · 360°
+δ = Radlenkwinkel (°)  (oft Mittelwert links/rechts)
+
+Interpretation:
+- kleines i → direkt (wenig Lenkrad, viel Radwinkel)
+- grosses i → indirekt (viel Lenkrad, wenig Radwinkel)</pre>
+              </div>
+
+              <p class="mini-note lg-muted mt-3">In Datenblättern steht oft „Lenkradumdrehungen Anschlag‑Anschlag“ statt α.</p>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Rechner</h3>
+
+              <label class="text-xs text-white/60">Ich will berechnen…</label>
+              <select id="steerCalcType" class="calc-input mt-1">
+                <option value="i">Übersetzung i (aus Umdrehungen & Radwinkel)</option>
+                <option value="delta">Radwinkel δ (aus i & Umdrehungen)</option>
+                <option value="turns">Lenkradumdrehungen (aus i & Radwinkel)</option>
+              </select>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3" id="steerFields"></div>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-md p-3">
+                <div class="text-xs text-white/60">Ergebnis</div>
+                <div class="text-2xl font-extrabold" id="steerResMain">–</div>
+                <div class="text-sm text-white/80 mt-1" id="steerResSub">–</div>
+              </div>
+
+              <div class="mt-3 text-sm text-white/70" id="steerFormula">–</div>
+
+              <div class="mt-3 flex flex-wrap gap-2 no-print">
+                <button id="steerReset" class="lg-btn" type="button">
+                  <i data-feather="rotate-ccw" class="w-4 h-4"></i><span>Reset</span>
+                </button>
+                <span class="pill text-xs text-white/60">
+                  <i data-feather="info" class="w-4 h-4"></i><span>Winkel in °</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 liquid-glass lg-surface lg-radius-lg p-4">
+            <h3 class="font-bold mb-2">Beispiele</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Beispiel 1</div>
+                <div class="font-bold">3.0 Umdr. / 35°</div>
+                <div class="mt-2 text-sm text-white/85">α = 3.0·360 = 1080° → i = 1080/35 ≈ <b>30.9</b></div>
+              </div>
+              <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Beispiel 2</div>
+                <div class="font-bold">2.2 Umdr. / 38°</div>
+                <div class="mt-2 text-sm text-white/85">α = 792° → i = 792/38 ≈ <b>20.8</b> (direkter)</div>
+              </div>
+              <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Beispiel 3</div>
+                <div class="font-bold">i = 16, Turns 2.4</div>
+                <div class="mt-2 text-sm text-white/85">α=864° → δ=864/16=<b>54°</b> (Rangier‑Zone)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Übersetzung)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="uebersetzung" placeholder="Formeln, Beispiele, typische Prüfungsaufgaben..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      
+      <!-- Betätigungskraft / Lenkkraft -->
+      <section id="lenkkraft" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <i data-feather="activity" class="w-5 h-5"></i><span>Betätigungskraft am Lenkrad (vereinfachtes Schulmodell)</span>
+          </h2>
+
+          <p class="text-sm text-white/80 m-0">
+            Dieser Rechner macht genau die Rechnung aus deinem Blatt: <b>Achslast → Reibkraft → Moment → Kraft am Lenkrad</b>.
+            Real ist das komplexer (Lenkgeometrie, Reifenverformung, Lenkrollhalbmesser, Nachlauf, Servo…), aber für Tests ist dieses Modell oft genau das, was gefragt wird.
+          </p>
+
+          <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <!-- Inputs -->
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Eingaben</h3>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Achslast vorne (kg)</label>
+                  <input id="lk_axleKg" class="calc-input" type="number" step="1" value="500" inputmode="decimal">
+                  <div class="mini-note text-white/70">Wird auf 2 Räder verteilt (pro Rad = /2).</div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Reibwert μ (–)</label>
+                  <input id="lk_mu" class="calc-input" type="number" step="0.01" value="0.80" inputmode="decimal">
+                  <div class="mini-note text-white/70">0.8 = trocken/hoher Grip (vereinfacht).</div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Reifenbreite (mm)</label>
+                  <input id="lk_w" class="calc-input" type="number" step="1" value="195" inputmode="decimal">
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Querschnitt (%)</label>
+                  <input id="lk_ar" class="calc-input" type="number" step="1" value="65" inputmode="decimal">
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Felge (Zoll)</label>
+                  <input id="lk_rim" class="calc-input" type="number" step="0.5" value="15" inputmode="decimal">
+                  <div class="mini-note text-white/70">Aus 195/65R15 wird r ≈ 0.317 m.</div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Lenkraddurchmesser (cm)</label>
+                  <input id="lk_swDiaCm" class="calc-input" type="number" step="0.5" value="30" inputmode="decimal">
+                  <div class="mini-note text-white/70">r<sub>Lenkrad</sub> = d/2.</div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">Übersetzung i (Lenkgetriebe)</label>
+                  <input id="lk_ratio" class="calc-input" type="number" step="0.1" value="20" inputmode="decimal">
+                  <div class="mini-note text-white/70">Im Blatt: i = 20.</div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs text-white/60">g (m/s²)</label>
+                  <input id="lk_g" class="calc-input" type="number" step="0.01" value="9.81" inputmode="decimal">
+                  <div class="mini-note text-white/70">Erdbeschleunigung.</div>
+                </div>
+              </div>
+
+              <div class="mt-3 flex flex-wrap gap-2">
+                <label class="pill text-xs text-white/70 cursor-pointer">
+                  <input id="lk_twoWheels" type="checkbox" checked class="mr-2">
+                  2 Räder berücksichtigen (×2)
+                </label>
+                <label class="pill text-xs text-white/70 cursor-pointer">
+                  <input id="lk_applyRatio" type="checkbox" checked class="mr-2">
+                  Übersetzung berücksichtigen (/i)
+                </label>
+              </div>
+
+              <div class="mt-3 flex flex-wrap gap-2 no-print">
+                <button id="lk_reset" class="lg-btn" type="button">
+                  <i data-feather="rotate-ccw" class="w-4 h-4"></i><span>Reset (wie Blatt)</span>
+                </button>
+                <span class="pill text-xs text-white/60">
+                  <i data-feather="info" class="w-4 h-4"></i><span>Resultat auch in daN</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Output -->
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Ergebnis</h3>
+
+              <div class="liquid-glass lg-surface lg-radius-md p-3">
+                <div class="text-xs text-white/60">Betätigungskraft am Lenkrad</div>
+                <div class="text-2xl font-extrabold" id="lk_main">–</div>
+                <div class="text-sm text-white/80 mt-1" id="lk_sub">–</div>
+              </div>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-2">Rechenschritte (1:1 wie im Blatt)</div>
+                <pre class="mini mono" id="lk_steps">–</pre>
+              </div>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-lg p-4">
+                <div class="text-xs text-white/60 mb-1">Kurz erklärt</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>Reibkraft pro Rad:</b> F<sub>R</sub> = (m<sub>Rad</sub>·g)·μ</li>
+                  <li><b>Moment (Schulmodell):</b> M = F<sub>R</sub>·r<sub>Reifen</sub></li>
+                  <li><b>Kraft am Lenkrad:</b> F = M / r<sub>Lenkrad</sub></li>
+                  <li><b>Optional:</b> 2 Räder ×2 und Lenkübersetzung /i</li>
+                </ul>
+              </div>
+
+              <p class="mini-note lg-muted mt-3">
+                Mini‑Reality‑Check: Ohne Servo kann das theoretisch riesig werden. In echten Fahrzeugen reduzieren Servo, Geometrie und Reifenverformung das stark.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Betätigungskraft)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="lenkkraft" placeholder="Was wurde vereinfacht? Welche Werte wurden in eurem Unterricht verwendet?"></textarea>
+          </div>
+        </div>
+      </section>
+
+
+<!-- Variabel -->
+      <section id="variabel" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="sliders" class="w-5 h-5"></i><span>Variable Übersetzung</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Was bedeutet „variabel“?</h3>
+              <p class="text-sm text-white/85 m-0">
+                Die Lenkung hat <b>nicht überall den gleichen Übersetzungsfaktor</b>.
+                In der Mitte ist sie meist <b>indirekter</b> (stabil), bei grösserem Einschlag <b>direkter</b> (Parken).
+              </p>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Technische Umsetzung</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>Progressive Zahnstange:</b> Zahnteilung/Steigung ändert sich entlang der Zahnstange.</li>
+                  <li><b>Zusätzliche Getriebestufe:</b> z.B. Planetengetriebe (aktiv).</li>
+                  <li><b>Aktuator/ECU:</b> überlagert Winkel/Moment (siehe Überlagerung).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Warum macht man das?</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Stabilität:</b> ruhiger Geradeauslauf.</li>
+                <li><b>Komfort:</b> weniger Korrekturen auf der Autobahn.</li>
+                <li><b>Handlichkeit:</b> weniger Lenkradweg beim Einparken.</li>
+                <li><b>Sicherheit:</b> besser kontrollierbar bei höherem Tempo.</li>
+              </ul>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Merksatz</div>
+                <div class="text-sm text-white/85"><b>Indirekt in der Mitte, direkt am Rand.</b></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 liquid-glass lg-surface lg-radius-lg p-4">
+            <details class="lg-details">
+              <summary><i data-feather="eye" class="w-4 h-4"></i>Mini‑Skizze: progressiv</summary>
+              <div class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                  <div class="text-xs text-white/60 mb-1">Mitte</div>
+<pre class="mini">Ritzel dreht 10°
+→ Zahnstange bewegt sich wenig
+→ i gross (stabil)</pre>
+                </div>
+                <div class="liquid-glass lg-surface lg-radius-lg p-4">
+                  <div class="text-xs text-white/60 mb-1">Rand</div>
+<pre class="mini">Ritzel dreht 10°
+→ Zahnstange bewegt sich mehr
+→ i klein (direkt)</pre>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Variabel)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="variabel" placeholder="Beispiele aus Fahrzeugen, Begriffe, Prüfungsfragen..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Überlagerung -->
+      <section id="ueberlagerung" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="shuffle" class="w-5 h-5"></i><span>Aufgaben der Überlagerungslenkung</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Was ist das?</h3>
+              <p class="text-sm text-white/85 m-0">
+                Eine Überlagerungslenkung kann zum Fahrerlenkwunsch <b>zusätzlich</b> einen kleinen Lenkwinkel/Lenkmoment
+                <b>überlagern</b>. Das Fahrzeug lenkt also „ein bisschen mit“ (kontrolliert).
+              </p>
+
+              <div class="mt-3">
+<pre class="mini">Fahrer → Lenkrad → Grundlenkung
+              +
+Steuergerät → Aktuator (überlagert Winkel/Moment)
+              =
+Radlenkwinkel</pre>
+              </div>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Aufgaben (nennen können)</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Variable Übersetzung</b> je nach Geschwindigkeit/Lenkwinkel.</li>
+                <li><b>Fahrstabilität:</b> Unter‑/Übersteuern dämpfen (kleine Gegenlenk‑Impulse).</li>
+                <li><b>Komfort:</b> Lenkradvibrationen/Spurrillen‑Einflüsse reduzieren.</li>
+                <li><b>Assistenz:</b> Parken, Spurhalten, Seitenwind‑Kompensation (je nach System).</li>
+                <li><b>Dämpfung/Rückstellen:</b> ruhiges Lenkrad, saubere Rückkehr.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4 liquid-glass lg-surface lg-radius-lg p-4">
+            <details class="lg-details">
+              <summary><i data-feather="clipboard" class="w-4 h-4"></i>Typischer Vergleich</summary>
+              <div class="mt-3 text-sm text-white/85">
+                <b>EPS</b> unterstützt primär das <b>Lenkmoment</b> (leichter lenken). <b>Überlagerungslenkung</b> kann zusätzlich
+                den <b>Lenkwinkel/Verhältnis</b> aktiv beeinflussen und Stabilitäts-/Assistenzfunktionen präziser umsetzen.
+              </div>
+            </details>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Überlagerung)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="ueberlagerung" placeholder="Welche Assistenzsysteme kennst du? Wie wird das bei euch genannt?"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hydraulik & EHPS -->
+      <section id="hydro" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="droplet" class="w-5 h-5"></i><span>Hydraulische & elektrohydraulische Lenkunterstützung</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Hydraulische Servolenkung (klassisch)</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Pumpe</b> (oft riemengetrieben) erzeugt Druck.</li>
+                <li><b>Behälter</b> speichert Servoöl.</li>
+                <li><b>Steuerventil</b> (Drehschieber + Torsionsstab) verteilt Druck je nach Lenkmoment.</li>
+                <li><b>Arbeitszylinder</b> (im Lenkgetriebe integriert) unterstützt Zahnstange/Mechanik.</li>
+                <li><b>Rücklauf</b> in den Behälter (evtl. über Kühler).</li>
+              </ul>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-lg p-3">
+                <div class="text-xs text-white/60 mb-2">Schema (Hydraulik)</div>
+                <svg viewBox="0 0 760 260" class="w-full" role="img" aria-label="Hydraulische Servolenkung Schema">
+                  <defs>
+                    <style>
+                      .b{fill:none;stroke:rgba(255,255,255,.55);stroke-width:2}
+                      .t{fill:rgba(255,255,255,.88);font:800 14px Inter, sans-serif}
+                      .s{fill:rgba(255,255,255,.65);font:600 12px Inter, sans-serif}
+                      html[data-theme="light"] .b{stroke:rgba(15,23,42,.38)}
+                      html[data-theme="light"] .t{fill:rgba(15,23,42,.92)}
+                      html[data-theme="light"] .s{fill:rgba(15,23,42,.72)}
+                    </style>
+                  </defs>
+                  <rect x="20" y="40" width="140" height="56" rx="14" class="b"/>
+                  <text x="90" y="74" text-anchor="middle" class="t">Pumpe</text>
+                  <rect x="20" y="150" width="140" height="56" rx="14" class="b"/>
+                  <text x="90" y="184" text-anchor="middle" class="t">Behälter</text>
+
+                  <rect x="240" y="40" width="180" height="56" rx="14" class="b"/>
+                  <text x="330" y="74" text-anchor="middle" class="t">Steuerventil</text>
+                  <text x="330" y="94" text-anchor="middle" class="s">(Torsionsstab)</text>
+
+                  <rect x="520" y="40" width="220" height="56" rx="14" class="b"/>
+                  <text x="630" y="74" text-anchor="middle" class="t">Arbeitszylinder</text>
+                  <text x="630" y="94" text-anchor="middle" class="s">(Lenkgetriebe)</text>
+
+                  <path d="M160 68 L240 68" class="b"/>
+                  <text x="200" y="58" text-anchor="middle" class="s">Druck</text>
+
+                  <path d="M330 96 L330 150 L160 178" class="b"/>
+                  <text x="270" y="168" text-anchor="middle" class="s">Rücklauf</text>
+
+                  <path d="M20 178 L20 110 L90 110 L90 96" class="b"/>
+                  <text x="58" y="124" text-anchor="middle" class="s">Ansaug</text>
+
+                  <path d="M420 58 L520 58" class="b"/>
+                  <path d="M420 78 L520 78" class="b"/>
+                  <text x="470" y="32" text-anchor="middle" class="s">links / rechts</text>
+
+                  <path d="M330 40 L330 18" class="b"/>
+                  <text x="330" y="14" text-anchor="middle" class="s">Lenkmoment</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Elektrohydraulisch (EHPS)</h3>
+              <p class="text-sm text-white/85 m-0">
+                Gleiches Prinzip, aber die Pumpe wird durch einen <b>Elektromotor</b> angetrieben und
+                bedarfsgerecht geregelt.
+              </p>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Vorteile / Nachteile</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>+</b> weniger Motorleistung im Leerlauf (Pumpe läuft nicht dauerhaft)</li>
+                  <li><b>+</b> Unterstützung besser an Geschwindigkeit anpassbar</li>
+                  <li><b>–</b> weiterhin Öl/Leitungen/Dichtungen (Leckage möglich)</li>
+                  <li><b>–</b> zusätzliche Elektrik (Pumpe/Relais/ECU)</li>
+                </ul>
+              </div>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-lg p-3">
+                <div class="text-xs text-white/60 mb-2">Schema (EHPS)</div>
+                <svg viewBox="0 0 760 260" class="w-full" role="img" aria-label="Elektrohydraulische Servolenkung Schema">
+                  <defs>
+                    <style>
+                      .b{fill:none;stroke:rgba(255,255,255,.55);stroke-width:2}
+                      .t{fill:rgba(255,255,255,.88);font:800 14px Inter, sans-serif}
+                      .s{fill:rgba(255,255,255,.65);font:600 12px Inter, sans-serif}
+                      html[data-theme="light"] .b{stroke:rgba(15,23,42,.38)}
+                      html[data-theme="light"] .t{fill:rgba(15,23,42,.92)}
+                      html[data-theme="light"] .s{fill:rgba(15,23,42,.72)}
+                    </style>
+                  </defs>
+
+                  <rect x="20" y="40" width="180" height="56" rx="14" class="b"/>
+                  <text x="110" y="74" text-anchor="middle" class="t">E‑Motor + Pumpe</text>
+
+                  <rect x="20" y="150" width="180" height="56" rx="14" class="b"/>
+                  <text x="110" y="184" text-anchor="middle" class="t">Behälter</text>
+
+                  <rect x="260" y="40" width="170" height="56" rx="14" class="b"/>
+                  <text x="345" y="74" text-anchor="middle" class="t">Steuerventil</text>
+
+                  <rect x="520" y="40" width="220" height="56" rx="14" class="b"/>
+                  <text x="630" y="74" text-anchor="middle" class="t">Arbeitszylinder</text>
+
+                  <rect x="260" y="150" width="170" height="56" rx="14" class="b"/>
+                  <text x="345" y="184" text-anchor="middle" class="t">Steuergerät</text>
+                  <text x="345" y="204" text-anchor="middle" class="s">(Speed, Moment)</text>
+
+                  <path d="M200 68 L260 68" class="b"/>
+                  <text x="230" y="58" text-anchor="middle" class="s">Druck</text>
+
+                  <path d="M345 96 L345 150" class="b"/>
+                  <path d="M430 58 L520 58" class="b"/>
+                  <path d="M430 78 L520 78" class="b"/>
+
+                  <path d="M260 178 L200 178" class="b"/>
+                  <text x="230" y="170" text-anchor="middle" class="s">Rücklauf</text>
+
+                  <path d="M20 178 L20 110 L110 110 L110 96" class="b"/>
+                  <text x="70" y="124" text-anchor="middle" class="s">Ansaug</text>
+
+                  <path d="M345 40 L345 18" class="b"/>
+                  <text x="345" y="14" text-anchor="middle" class="s">Lenkmoment</text>
+
+                  <path d="M345 150 L110 96" class="b"/>
+                  <text x="220" y="118" text-anchor="middle" class="s">Regelt Pumpe</text>
+                </svg>
+              </div>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-lg p-4">
+                <h4 class="font-bold mb-2">Ventil‑Funktion (simpel)</h4>
+                <p class="text-sm text-white/85 m-0">
+                  Beim Lenken verdreht sich der <b>Torsionsstab</b> minimal → Ventil öffnet Kanäle → Drucköl geht auf eine
+                  Seite des Zylinders → Unterstützung. In Mittelstellung ist es (fast) neutral.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (Hydraulik/EHPS)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="hydro" placeholder="Ölsorten, typische Fehler, Entlüften, Geräusche..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- EPS -->
+      <section id="eps" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="zap" class="w-5 h-5"></i><span>Elektrische Lenkunterstützung (EPS)</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Aufbau (Bauteile)</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Drehmoment‑Sensor</b> (wie stark du lenkst)</li>
+                <li><b>Lenkwinkelsensor</b> (Position/Bewegung)</li>
+                <li><b>Steuergerät (ECU)</b> (rechnet Assistenz)</li>
+                <li><b>Elektromotor + Getriebe</b> (liefert Assistenzmoment)</li>
+                <li><b>Mechanische Grundlenkung</b> bleibt vorhanden (klassische EPS)</li>
+              </ul>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-lg p-3">
+                <div class="text-xs text-white/60 mb-2">EPS‑Schema</div>
+                <svg viewBox="0 0 760 260" class="w-full" role="img" aria-label="Elektrische Servolenkung Schema">
+                  <defs>
+                    <style>
+                      .b{fill:none;stroke:rgba(255,255,255,.55);stroke-width:2}
+                      .t{fill:rgba(255,255,255,.88);font:800 14px Inter, sans-serif}
+                      .s{fill:rgba(255,255,255,.65);font:600 12px Inter, sans-serif}
+                      html[data-theme="light"] .b{stroke:rgba(15,23,42,.38)}
+                      html[data-theme="light"] .t{fill:rgba(15,23,42,.92)}
+                      html[data-theme="light"] .s{fill:rgba(15,23,42,.72)}
+                    </style>
+                  </defs>
+
+                  <rect x="20" y="40" width="150" height="56" rx="14" class="b"/>
+                  <text x="95" y="74" text-anchor="middle" class="t">Lenkrad</text>
+
+                  <rect x="210" y="40" width="190" height="56" rx="14" class="b"/>
+                  <text x="305" y="74" text-anchor="middle" class="t">Sensoren</text>
+                  <text x="305" y="94" text-anchor="middle" class="s">(Moment/Winkel)</text>
+
+                  <rect x="430" y="40" width="150" height="56" rx="14" class="b"/>
+                  <text x="505" y="74" text-anchor="middle" class="t">ECU</text>
+
+                  <rect x="610" y="40" width="130" height="56" rx="14" class="b"/>
+                  <text x="675" y="74" text-anchor="middle" class="t">E‑Motor</text>
+
+                  <rect x="250" y="150" width="260" height="56" rx="14" class="b"/>
+                  <text x="380" y="184" text-anchor="middle" class="t">Lenkgetriebe</text>
+                  <text x="380" y="204" text-anchor="middle" class="s">(Zahnstange)</text>
+
+                  <path d="M170 68 L210 68" class="b"/>
+                  <path d="M400 68 L430 68" class="b"/>
+                  <path d="M580 68 L610 68" class="b"/>
+
+                  <path d="M675 96 L675 150 L510 178" class="b"/>
+                  <text x="620" y="168" text-anchor="middle" class="s">Assistenzmoment</text>
+
+                  <path d="M95 96 L95 150 L250 178" class="b"/>
+                  <text x="170" y="168" text-anchor="middle" class="s">Mechanisch</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Varianten (wo sitzt der Motor?)</h3>
+              <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                <li><b>Column‑Assist:</b> Motor an Lenksäule (günstig/kompakt)</li>
+                <li><b>Pinion‑Assist:</b> Motor am Ritzel (direkter)</li>
+                <li><b>Rack‑Assist:</b> Motor an der Zahnstange (stark, oft bei schwereren Autos)</li>
+              </ul>
+
+              <div class="mt-3">
+                <div class="text-xs text-white/60 mb-1">Vorteile / Nachteile</div>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>+</b> kein Öl, keine Pumpe, weniger Leckage/Wartung</li>
+                  <li><b>+</b> Energie nur wenn nötig (effizient)</li>
+                  <li><b>+</b> Assistenzfunktionen leichter integrierbar</li>
+                  <li><b>–</b> abhängig von Sensorik/Elektronik (Fehlercodes, Kalibrierung)</li>
+                  <li><b>–</b> Unterspannung kann Unterstützung reduzieren</li>
+                </ul>
+              </div>
+
+              <div class="mt-3 liquid-glass lg-surface lg-radius-lg p-4">
+                <h4 class="font-bold mb-2">Typische Themen in der Werkstatt</h4>
+                <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+                  <li><b>Anlernen/Kalibrieren:</b> Lenkwinkel nach Achsvermessung/Teiletausch.</li>
+                  <li><b>Batterie:</b> Unterspannung → EPS Fehler/Schwergängigkeit.</li>
+                  <li><b>Diagnose:</b> DTC auslesen + Live‑Daten (Moment, Winkel, Strom).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="text-sm font-bold">Deine Notizen (EPS)</label>
+            <textarea class="calc-input mt-2 min-h-[120px]" data-note="eps" placeholder="Fehlercodes, typische Symptome, Lernwerte..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notizen -->
+      <section id="notizen" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-3 flex items-center gap-2">
+            <i data-feather="edit-3" class="w-5 h-5"></i><span>Eigene Informationen & Notizen</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Freie Notizen</h3>
+              <textarea class="calc-input min-h-[220px]" data-note="free" placeholder="Alles, was du sonst noch brauchst: Definitionen, Prüfungsfragen, Beispiele..."></textarea>
+
+              <div class="mt-3 flex flex-wrap gap-2 no-print">
+                <button id="clearNotesBtn" class="lg-btn" type="button">
+                  <i data-feather="trash-2" class="w-4 h-4"></i><span>Alle Notizen löschen</span>
+                </button>
+                <span class="pill text-xs text-white/60">
+                  <i data-feather="save" class="w-4 h-4"></i><span>Autosave (LocalStorage)</span>
+                </span>
+              </div>
+
+              <p class="mini-note lg-muted mt-3">Notizen bleiben auf diesem Gerät/Browser. Browserdaten löschen = Notizen weg. So ist das Leben.</p>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-lg p-4">
+              <h3 class="font-bold mb-2">Eigene Lernkarten (Custom)</h3>
+
+              <div class="grid grid-cols-1 gap-2">
+                <input id="customTitle" class="calc-input" placeholder="Titel (z.B. 'Ackermann', 'Bump‑Steer', 'Prüfungsfrage 7')" />
+                <textarea id="customBody" class="calc-input min-h-[120px]" placeholder="Inhalt (kurz & spickzettel‑tauglich)"></textarea>
+              </div>
+
+              <div class="mt-3 flex flex-wrap gap-2 no-print">
+                <button id="addCustomBtn" class="lg-btn" type="button">
+                  <i data-feather="plus-circle" class="w-4 h-4"></i><span>Hinzufügen</span>
+                </button>
+                <button id="exportCustomBtn" class="lg-btn" type="button">
+                  <i data-feather="share-2" class="w-4 h-4"></i><span>Custom export</span>
+                </button>
+              </div>
+
+              <div class="mt-4">
+                <div class="text-xs text-white/60 mb-2">Deine Lernkarten</div>
+                <div id="customList" class="grid grid-cols-1 gap-2"></div>
+                <div id="customEmpty" class="text-sm text-white/70 hidden">Noch keine Karten.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 liquid-glass lg-surface lg-radius-lg p-4">
+            <h3 class="font-bold mb-2">Quick‑Tipp fürs Lernen</h3>
+            <ul class="text-sm space-y-2 m-0 pl-5 text-white/85">
+              <li>Mach aus jedem Abschnitt <b>3 Prüfungsfragen</b> (und beantworte sie ohne zu schauen).</li>
+              <li>Rechner 2–3x mit eigenen Zahlen nutzen, bis du’s ohne „Mathe‑Panik“ erklären kannst.</li>
+              <li>Wenn du’s nicht in <b>2 Sätzen</b> erklären kannst, ist es noch nicht „spickzettel‑ready“.</li>
+            </ul>
+          </div>
+
+          <p class="mini-note lg-muted mt-3">* Wetter‑Widget braucht Internet. Alles andere läuft lokal.</p>
+        </div>
+      </section>
+
+      <div class="opacity-70 text-xs text-center my-10">
+        <div class="liquid-glass lg-surface lg-radius-pill inline-flex items-center gap-2 px-4 py-2">
+          <span>© LearnCraft Pro</span>
+          <span class="w-1 h-1 rounded-full bg-white/30"></span>
+          <span>LenkungPRO</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Bar (wie eure Seiten) -->
+  <nav id="bottomBar" class="liquid-glass bottom-bar lg-radius-pill no-print" aria-label="Navigation">
+    <a class="bar-item active" href="Index.html" aria-label="Home">
+      <i data-feather="home" class="bar-icon"></i>
+      <span class="bar-label">Home</span>
+    </a>
+
+    <a class="bar-item" href="#overview" data-target="overview" aria-label="Übersicht">
+      <i data-feather="grid" class="bar-icon"></i>
+      <span class="bar-label">Übersicht</span>
+    </a>
+
+    <a class="bar-item" href="#uebersetzung" data-target="uebersetzung" aria-label="Rechner">
+      <i data-feather="cpu" class="bar-icon"></i>
+      <span class="bar-label">Rechner</span>
+    </a>
+
+    <a class="bar-item" href="#notizen" data-target="notizen" aria-label="Notizen">
+      <i data-feather="edit-3" class="bar-icon"></i>
+      <span class="bar-label">Notizen</span>
+    </a>
+
+    <button id="themeToggle" class="bar-item" type="button" aria-label="Theme wechseln">
+      <i id="themeIcon" data-feather="sun" class="bar-icon"></i>
+      <span class="bar-label">Theme</span>
+    </button>
+  </nav>
+
+  <div id="scrollProgress"></div>
+
+  <script>
+    // Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.feather) feather.replace();
+    });
+
+    // Theme (wie FelgenPRO/Lenkgeometrie)
+    (function themeInit(){
+      const html = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      function applyTheme(mode){
+        html.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+        if (icon) icon.setAttribute('data-feather', mode === 'dark' ? 'sun' : 'moon');
+        if (window.feather) feather.replace();
+      }
+
+      applyTheme(localStorage.getItem('theme') || 'dark');
+
+      btn?.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+
+    // Date/Time
+    function updateDateTime() {
+      const now = new Date();
+      const d = document.getElementById('date');
+      const t = document.getElementById('time');
+      if (d) d.textContent = now.toLocaleDateString('de-CH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      if (t) t.textContent = now.toLocaleTimeString('de-CH');
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Weather (simple)
+    async function fetchWeather(){
+      try{
+        const res = await fetch('https://wttr.in/Bern?format=%25C|%25t', {cache:'no-store'});
+        const text = await res.text();
+        const [c,temp] = (text||'').split('|');
+        const wxT = document.getElementById('wxText');
+        const wxTemp = document.getElementById('wxTemp');
+        if (wxT) wxT.textContent = c || '–';
+        if (wxTemp) wxTemp.textContent = (temp||'–').replace('+','');
+      }catch(e){}
+    }
+    fetchWeather();
+
+    // Print
+    document.getElementById('printBtn')?.addEventListener('click', () => window.print());
+
+    // Smooth anchor scroll
+    document.addEventListener('click', (e)=>{
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+
+    // Search overview cards
+    const searchInput = document.getElementById('q');
+    const grid = document.getElementById('grid');
+    const emptyState = document.getElementById('empty');
+    const cards = grid ? [...grid.querySelectorAll('.searchable')] : [];
+
+    function normalize(text) {
+      return (text || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+    }
+    function performSearch() {
+      const q = normalize((searchInput?.value || '').trim());
+      let has = false;
+      cards.forEach(card => {
+        const text = normalize(card.innerText);
+        const ok = !q || text.includes(q);
+        card.style.display = ok ? 'flex' : 'none';
+        if (ok) has = true;
+      });
+      if (emptyState) emptyState.style.display = has ? 'none' : 'block';
+    }
+    searchInput?.addEventListener('input', performSearch);
+
+    // Cards vs List (Overview layout)
+    const viewCardsBtn = document.getElementById('viewCards');
+    const viewListBtn  = document.getElementById('viewList');
+
+    function setView(isList){
+      if (!grid) return;
+      grid.classList.toggle('grid-cols-1', true);
+      grid.classList.toggle('sm:grid-cols-2', !isList);
+      grid.classList.toggle('lg:grid-cols-3', !isList);
+      grid.classList.toggle('gap-1', isList);
+      grid.classList.toggle('gap-4', !isList);
+      viewCardsBtn?.setAttribute('aria-pressed', String(!isList));
+      viewListBtn?.setAttribute('aria-pressed', String(isList));
+    }
+    viewCardsBtn?.addEventListener('click', () => setView(false));
+    viewListBtn?.addEventListener('click', () => setView(true));
+
+    // Bottom bar active state (IntersectionObserver)
+    (function barActive(){
+      const links = [...document.querySelectorAll('#bottomBar a[data-target]')];
+      if (!links.length) return;
+
+      const obs = new IntersectionObserver((entries)=>{
+        entries.forEach(ent=>{
+          const id = ent.target?.id;
+          const link = links.find(a => a.getAttribute('data-target') === id);
+          if (!link) return;
+          if (ent.isIntersecting){
+            links.forEach(x => x.classList.remove('active'));
+            // Home bleibt bei euch sowieso "active" – wir lassen es aber so wie in den Vorlagen:
+            // aktivieren nur section-links, wenn sie sichtbar sind.
+            link.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0.08 });
+
+      ['overview','uebersetzung','notizen'].forEach(id=>{
+        const el = document.getElementById(id);
+        if (el) obs.observe(el);
+      });
+    })();
+
+    // Scroll progress
+    (function(){
+      const progress = document.getElementById('scrollProgress');
+      const onScroll = () => {
+        const h = document.documentElement;
+        const denom = (h.scrollHeight - h.clientHeight) || 1;
+        progress.style.width = (h.scrollTop / denom * 100).toFixed(2) + '%';
+      };
+      document.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    })();
+
+    /* ===== Lenkübersetzungs-Rechner ===== */
+    (() => {
+      const typeEl  = document.getElementById("steerCalcType");
+      const fields  = document.getElementById("steerFields");
+      const resMain = document.getElementById("steerResMain");
+      const resSub  = document.getElementById("steerResSub");
+      const formula = document.getElementById("steerFormula");
+      const reset   = document.getElementById("steerReset");
+
+      const fmt = (n, d=2) => (Number.isFinite(n) ? n.toFixed(d).replace('.', ',') : "–");
+      const num = (v) => {
+        const x = parseFloat(String(v ?? '').replace(',', '.'));
+        return Number.isFinite(x) ? x : NaN;
+      };
+
+      const CONFIG = {
+        i: {
+          title: "Übersetzung i",
+          f: "i = α / δ   mit α = Turns·360°",
+          fields: [
+            { id:"turns", label:"Lenkradumdrehungen (Anschlag→Anschlag)", step:"0.01", value:"3.0" },
+            { id:"delta", label:"Radlenkwinkel δ (°) (Mittelwert)", step:"0.1", value:"35" },
+          ],
+          compute: (v) => {
+            const turns = num(v.turns), delta = num(v.delta);
+            if(!(turns>0 && delta>0)) return null;
+            const alpha = turns*360;
+            const i = alpha/delta;
+            return {
+              main: `${fmt(i,1)} : 1`,
+              sub: `α=${fmt(alpha,0)}° / δ=${fmt(delta,1)}° → i=${fmt(i,1)}`
+            };
+          }
+        },
+        delta: {
+          title: "Radwinkel δ",
+          f: "δ = α / i   mit α = Turns·360°",
+          fields: [
+            { id:"i", label:"Übersetzung i", step:"0.1", value:"22" },
+            { id:"turns", label:"Lenkradumdrehungen (Anschlag→Anschlag)", step:"0.01", value:"2.6" },
+          ],
+          compute: (v) => {
+            const i = num(v.i), turns = num(v.turns);
+            if(!(i>0 && turns>0)) return null;
+            const alpha = turns*360;
+            const delta = alpha/i;
+            return {
+              main: `${fmt(delta,1)}°`,
+              sub: `α=${fmt(alpha,0)}° / i=${fmt(i,1)} → δ=${fmt(delta,1)}°`
+            };
+          }
+        },
+        turns: {
+          title: "Lenkradumdrehungen",
+          f: "Turns = (i · δ) / 360°",
+          fields: [
+            { id:"i", label:"Übersetzung i", step:"0.1", value:"25" },
+            { id:"delta", label:"Radlenkwinkel δ (°) (Mittelwert)", step:"0.1", value:"35" },
+          ],
+          compute: (v) => {
+            const i = num(v.i), delta = num(v.delta);
+            if(!(i>0 && delta>0)) return null;
+            const turns = (i*delta)/360;
+            return {
+              main: `${fmt(turns,2)} Umdr.`,
+              sub: `Turns = (${fmt(i,1)}·${fmt(delta,1)})/360`
+            };
+          }
+        }
+      };
+
+      function render(){
+        const key = typeEl.value;
+        const cfg = CONFIG[key];
+        formula.textContent = `${cfg.title}: ${cfg.f}`;
+
+        fields.innerHTML = "";
+        cfg.fields.forEach(f => {
+          const wrap = document.createElement("div");
+          wrap.className = "flex flex-col gap-1";
+
+          const lab = document.createElement("label");
+          lab.className = "text-xs text-white/60";
+          lab.textContent = f.label;
+
+          const input = document.createElement("input");
+          input.className = "calc-input";
+          input.type = "number";
+          input.step = f.step || "any";
+          input.value = f.value ?? "";
+          input.id = "s_" + f.id;
+          input.inputMode = "decimal";
+          input.addEventListener("input", run);
+
+          wrap.appendChild(lab);
+          wrap.appendChild(input);
+          fields.appendChild(wrap);
+        });
+
+        run();
+      }
+
+      function getVals(){
+        const key = typeEl.value;
+        const cfg = CONFIG[key];
+        const v = {};
+        cfg.fields.forEach(f => v[f.id] = document.getElementById("s_"+f.id)?.value);
+        return v;
+      }
+
+      function run(){
+        const key = typeEl.value;
+        const cfg = CONFIG[key];
+        const r = cfg.compute(getVals());
+        if(!r){
+          resMain.textContent = "–";
+          resSub.textContent = "Bitte gültige, positive Werte eingeben.";
+          return;
+        }
+        resMain.textContent = r.main;
+        resSub.textContent  = r.sub;
+      }
+
+      typeEl.addEventListener("change", render);
+      reset.addEventListener("click", render);
+      render();
+    })();
+
+    
+    /* ===== Betätigungskraft-Rechner (wie Schulblatt) ===== */
+    (() => {
+      const $ = (id) => document.getElementById(id);
+
+      const el = {
+        axleKg: $("lk_axleKg"),
+        mu: $("lk_mu"),
+        w: $("lk_w"),
+        ar: $("lk_ar"),
+        rim: $("lk_rim"),
+        swDiaCm: $("lk_swDiaCm"),
+        ratio: $("lk_ratio"),
+        g: $("lk_g"),
+        two: $("lk_twoWheels"),
+        apply: $("lk_applyRatio"),
+        reset: $("lk_reset"),
+        main: $("lk_main"),
+        sub: $("lk_sub"),
+        steps: $("lk_steps"),
+      };
+
+      const num = (v) => {
+        const x = parseFloat(String(v ?? "").replace(",", "."));
+        return Number.isFinite(x) ? x : NaN;
+      };
+      const fmt = (n, d=2) => Number.isFinite(n) ? n.toFixed(d).replace(".", ",") : "–";
+
+      function tireRadiusM(widthMm, aspectPct, rimIn){
+        const w = num(widthMm), ar = num(aspectPct), rim = num(rimIn);
+        if(!(w>0 && ar>0 && rim>0)) return NaN;
+        const sidewallMm = w * (ar/100);
+        const rimMm = rim * 25.4;
+        const diamMm = rimMm + 2*sidewallMm;
+        return (diamMm/2) / 1000; // m
+      }
+
+      function compute(){
+        const axleKg = num(el.axleKg?.value);
+        const mu = num(el.mu?.value);
+        const g = num(el.g?.value);
+
+        const rTire = tireRadiusM(el.w?.value, el.ar?.value, el.rim?.value);
+        const swDiaCm = num(el.swDiaCm?.value);
+        const rSW = (swDiaCm/2) / 100;
+
+        const ratio = num(el.ratio?.value);
+        const useTwo = !!el.two?.checked;
+        const useRatio = !!el.apply?.checked;
+
+        // Basic validation
+        if(!(axleKg>0 && mu>0 && g>0 && rTire>0 && rSW>0)){
+          el.main.textContent = "–";
+          el.sub.textContent = "Bitte gültige, positive Werte eingeben.";
+          el.steps.textContent = "–";
+          return;
+        }
+
+        // 1) Radlast pro Rad (vereinfacht: gleichmässig)
+        const mWheel = axleKg/2;
+
+        // 2) Reibkraft pro Rad
+        const FR = mWheel * g * mu;
+
+        // 3) Moment (wie im Blatt)
+        const M = FR * rTire;
+
+        // 4) Kraft am Lenkrad (ohne Korrekturen)
+        const F0 = M / rSW;
+
+        // 5) Optional: 2 Räder & Übersetzung
+        const Ftwo = useTwo ? (F0 * 2) : F0;
+        const Ffinal = (useRatio && ratio>0) ? (Ftwo / ratio) : Ftwo;
+
+        const daN = Ffinal / 10;
+
+        // Output
+        el.main.textContent = `${fmt(Ffinal,1)} N  (${fmt(daN,1)} daN)`;
+
+        const cmp = (Ffinal <= 150) ? "≤ 150 N (M1‑Richtwert)" : "> 150 N (M1‑Richtwert)";
+        el.sub.textContent = `Schulmodell • ${cmp}`;
+
+        const lines = [];
+        lines.push(`Gegeben: Achslast vorn = ${fmt(axleKg,0)} kg, μ=${fmt(mu,2)}, g=${fmt(g,2)} m/s²`);
+        lines.push(`Reifen: ${fmt(num(el.w.value),0)}/${fmt(num(el.ar.value),0)}R${fmt(num(el.rim.value),0)} → r_Reifen = ${fmt(rTire,5)} m`);
+        lines.push(`Lenkrad: d=${fmt(swDiaCm,1)} cm → r_Lenkrad = ${fmt(rSW,3)} m`);
+        lines.push("");
+        lines.push(`1) Radmasse pro Rad: m_Rad = Achslast/2 = ${fmt(mWheel,1)} kg`);
+        lines.push(`2) Reibkraft pro Rad: F_R = m_Rad · g · μ = ${fmt(mWheel,1)}·${fmt(g,2)}·${fmt(mu,2)} = ${fmt(FR,2)} N`);
+        lines.push(`3) Moment (wie Blatt): M = F_R · r_Reifen = ${fmt(FR,2)}·${fmt(rTire,5)} = ${fmt(M,2)} Nm`);
+        lines.push(`4) Kraft am Lenkrad: F_0 = M / r_Lenkrad = ${fmt(M,2)}/${fmt(rSW,3)} = ${fmt(F0,2)} N`);
+        if(useTwo){
+          lines.push(`5) 2 Räder: F = F_0 · 2 = ${fmt(F0,2)}·2 = ${fmt(Ftwo,2)} N`);
+        }else{
+          lines.push(`5) 2 Räder: (nicht berücksichtigt) → F = ${fmt(Ftwo,2)} N`);
+        }
+        if(useRatio){
+          if(ratio>0){
+            lines.push(`6) Übersetzung: F_final = F / i = ${fmt(Ftwo,2)}/${fmt(ratio,1)} = ${fmt(Ffinal,2)} N`);
+          }else{
+            lines.push(`6) Übersetzung: i ungültig (≤0) → nicht angewendet`);
+          }
+        }else{
+          lines.push(`6) Übersetzung: (nicht berücksichtigt) → F_final = ${fmt(Ffinal,2)} N`);
+        }
+
+        el.steps.textContent = lines.join("\n");
+      }
+
+      function bind(){
+        const ids = ["lk_axleKg","lk_mu","lk_w","lk_ar","lk_rim","lk_swDiaCm","lk_ratio","lk_g","lk_twoWheels","lk_applyRatio"];
+        ids.forEach(id => $(id)?.addEventListener("input", compute));
+        ids.forEach(id => $(id)?.addEventListener("change", compute));
+
+        el.reset?.addEventListener("click", () => {
+          el.axleKg.value = 500;
+          el.mu.value = 0.80;
+          el.w.value = 195;
+          el.ar.value = 65;
+          el.rim.value = 15;
+          el.swDiaCm.value = 30;
+          el.ratio.value = 20;
+          el.g.value = 9.81;
+          el.two.checked = true;
+          el.apply.checked = true;
+          compute();
+          if (window.feather) feather.replace();
+        });
+
+        compute();
+      }
+
+      // Init
+      if(el.axleKg) bind();
+    })();
+
+
+/* ===== Notizen Autosave + Export ===== */
+    (() => {
+      const PREFIX = "LenkungPRO_note_";
+      const areas = [...document.querySelectorAll("textarea[data-note]")];
+
+      const save = (key, val) => localStorage.setItem(PREFIX + key, val ?? "");
+      const load = (key) => localStorage.getItem(PREFIX + key) ?? "";
+
+      areas.forEach(a => {
+        const key = a.getAttribute("data-note");
+        a.value = load(key);
+      });
+
+      let timer = null;
+      areas.forEach(a => {
+        a.addEventListener("input", () => {
+          const key = a.getAttribute("data-note");
+          clearTimeout(timer);
+          timer = setTimeout(() => save(key, a.value), 120);
+        });
+      });
+
+      // Export helpers
+      function downloadText(filename, text){
+        const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 1500);
+      }
+
+      function collectNotes(){
+        const rows = [];
+        areas.forEach(a => {
+          const key = a.getAttribute("data-note");
+          const val = (a.value || "").trim();
+          if(!val) return;
+          rows.push(`### ${key}\n${val}\n`);
+        });
+        return rows.join("\n");
+      }
+
+      document.getElementById("exportNotesBtn")?.addEventListener("click", () => {
+        const custom = (localStorage.getItem("LenkungPRO_custom_cards") || "[]");
+        const text = (collectNotes() || "Keine Notizen vorhanden.\n") + "\n---\nCustomCards(JSON):\n" + custom + "\n";
+        downloadText("LenkungPRO_Notizen_Export.txt", text);
+      });
+
+      document.getElementById("clearNotesBtn")?.addEventListener("click", () => {
+        if(!confirm("Wirklich ALLE Notizen löschen? (Kann man nicht rückgängig machen)")) return;
+        Object.keys(localStorage).forEach(k => { if(k.startsWith(PREFIX)) localStorage.removeItem(k); });
+        areas.forEach(a => a.value = "");
+      });
+
+      // expose for custom export
+      window.__downloadText = downloadText;
+    })();
+
+    /* ===== Custom Lernkarten ===== */
+    (() => {
+      const KEY = "LenkungPRO_custom_cards";
+      const list = document.getElementById("customList");
+      const empty = document.getElementById("customEmpty");
+      const title = document.getElementById("customTitle");
+      const body = document.getElementById("customBody");
+      const addBtn = document.getElementById("addCustomBtn");
+      const exportBtn = document.getElementById("exportCustomBtn");
+
+      const read = () => {
+        try{ return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+        catch(e){ return []; }
+      };
+      const write = (cards) => localStorage.setItem(KEY, JSON.stringify(cards));
+
+      function escapeHtml(str){
+        return String(str ?? "")
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;")
+          .replaceAll('"',"&quot;")
+          .replaceAll("'","&#039;");
+      }
+
+      const render = () => {
+        const cards = read();
+        list.innerHTML = "";
+        empty.classList.toggle("hidden", cards.length !== 0);
+
+        cards.forEach((c, idx) => {
+          const wrap = document.createElement("div");
+          wrap.className = "liquid-glass lg-surface lg-radius-lg p-4";
+
+          const top = document.createElement("div");
+          top.className = "flex items-start justify-between gap-2";
+
+          const h = document.createElement("div");
+          h.innerHTML = `<div class="font-extrabold">${escapeHtml(c.title || "Ohne Titel")}</div>
+                         <div class="text-sm text-white/85 whitespace-pre-wrap mt-2">${escapeHtml(c.body || "")}</div>`;
+
+          const del = document.createElement("button");
+          del.className = "lg-btn";
+          del.type = "button";
+          del.innerHTML = `<i data-feather="x" class="w-4 h-4"></i><span>Löschen</span>`;
+          del.addEventListener("click", () => {
+            const next = read().filter((_, i) => i !== idx);
+            write(next);
+            render();
+          });
+
+          top.appendChild(h);
+          top.appendChild(del);
+          wrap.appendChild(top);
+          list.appendChild(wrap);
+        });
+
+        if (window.feather) feather.replace();
+      };
+
+      const add = () => {
+        const t = (title.value || "").trim();
+        const b = (body.value || "").trim();
+        if(!t && !b) return;
+        const cards = read();
+        cards.unshift({ title: t || "Ohne Titel", body: b, ts: Date.now() });
+        write(cards);
+        title.value = "";
+        body.value = "";
+        render();
+      };
+
+      addBtn?.addEventListener("click", add);
+
+      exportBtn?.addEventListener("click", () => {
+        const cards = read();
+        const text = cards.length
+          ? cards.map((c,i)=>`# ${i+1} ${c.title}\n${c.body}\n`).join("\n")
+          : "Keine Custom-Karten vorhanden.\n";
+        window.__downloadText?.("LenkungPRO_CustomKarten.txt", text);
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

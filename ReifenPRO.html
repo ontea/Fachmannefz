@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ReifenPRO – Rechner & Wissen</title>
+  <meta name="description" content="Reifenrechner, Bremsweg, Indizes, Kennzeichnungen – im Index/Liquid-Glass Design. Offline nutzbar.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <style>
+    /* ============ LIGHT MODE LESBARKEIT (fix) ============ */
+    [data-theme="light"] body { color: rgba(15,23,42,0.92); }
+    [data-theme="light"] .liquid-glass{
+      background: rgba(255,255,255,0.70) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.10) !important;
+      color: rgba(15,23,42,0.92) !important;
+    }
+    [data-theme="light"] .text-white{ color: rgba(15,23,42,0.92) !important; }
+    [data-theme="light"] .text-white\/85{ color: rgba(15,23,42,0.85) !important; }
+    [data-theme="light"] .text-white\/75{ color: rgba(15,23,42,0.78) !important; }
+    [data-theme="light"] .text-white\/70{ color: rgba(15,23,42,0.70) !important; }
+    [data-theme="light"] .text-white\/60{ color: rgba(15,23,42,0.60) !important; }
+
+    [data-theme="light"] .bg-white\/5{ background: rgba(2,6,23,0.04) !important; }
+    [data-theme="light"] .border-white\/10{ border-color: rgba(15,23,42,0.14) !important; }
+    [data-theme="light"] .focus\:border-white\/20:focus{ border-color: rgba(15,23,42,0.22) !important; }
+    [data-theme="light"] .focus\:ring-white\/10:focus{ --tw-ring-color: rgba(2,6,23,0.10) !important; }
+
+    [data-theme="light"] .lg-badge,
+    [data-theme="light"] .lg-chip{
+      background: rgba(2,6,23,0.06) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      color: rgba(15,23,42,0.78) !important;
+    }
+
+    /* Tables in light mode */
+    [data-theme="light"] thead th{
+      background: rgba(2,6,23,0.06) !important;
+      color: rgba(15,23,42,0.80) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+    }
+    [data-theme="light"] tbody td{
+      border-color: rgba(15,23,42,0.10) !important;
+    }
+
+    /* Inputs: keep them readable */
+    input, select, button { outline-color: rgba(56,189,248,.8); }
+    [data-theme="light"] input, [data-theme="light"] select{
+      color: rgba(15,23,42,0.92) !important;
+    }
+
+    .hidden{ display:none !important; }
+    .scroll-mt-24 { scroll-margin-top: 7rem; }
+
+    /* Optional fallback if style.css doesn't define it */
+    #scrollProgress{
+      position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+      background: rgba(56,189,248,.85);
+      z-index: 99999;
+    }
+  </style>
+</head>
+
+<body class="app">
+  <!-- SVG Filter: “liquid / distortion” -->
+  <svg class="svg-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="glass-distortion">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <main class="page-wrap">
+    <div class="max-w-5xl mx-auto p-5">
+
+      <!-- Widgets (wie Index) -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="calendar" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Date</p>
+              <div class="font-extrabold" id="date">–</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="clock" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Time</p>
+              <div class="font-extrabold" id="time">–</div>
+            </div>
+          </div>
+
+          <div class="lg-divider"></div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="cloud" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Weather · Bern</p>
+              <div class="font-extrabold"><span id="wxText">–</span> · <span id="wxTemp">–°C</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search (wie Index) -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6 sticky top-2 md:top-4 z-20">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="relative flex-1 min-w-[220px]">
+            <i data-feather="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4"></i>
+            <input id="q" type="search" placeholder="ReifenPRO durchsuchen..."
+              class="w-full bg-white/5 text-white border border-white/10 rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10">
+          </div>
+
+          <div class="flex gap-2">
+            <button id="viewCards" aria-pressed="true" class="lg-btn">
+              <i data-feather="grid" class="w-4 h-4"></i><span>Karten</span>
+            </button>
+            <button id="viewList" aria-pressed="false" class="lg-btn">
+              <i data-feather="list" class="w-4 h-4"></i><span>Liste</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Overview -->
+      <section id="overview" class="scroll-mt-24">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl sm:text-3xl font-bold">ReifenPRO</h1>
+        </div>
+
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="rechner">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="cpu" class="w-4 h-4"></i><span class="text-sm">Reifen</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Reifenrechner</h3>
+            <p class="text-white/75 m-0">Außen-Ø, Umfang, Vergleich.</p>
+            <a class="lg-open mt-auto" href="#rechner">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="bremsweg">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="activity" class="w-4 h-4"></i><span class="text-sm">Anhalteweg</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Bremsweg</h3>
+            <p class="text-white/75 m-0">Reaktion + Bremsung, µ, ABS-Faktor.</p>
+            <a class="lg-open mt-auto" href="#bremsweg">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="indices">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="tag" class="w-4 h-4"></i><span class="text-sm">LI / Speed</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Indizes</h3>
+            <p class="text-white/75 m-0">Geschwindigkeit & Tragfähigkeit.</p>
+            <a class="lg-open mt-auto" href="#indices">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="kennz">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="image" class="w-4 h-4"></i><span class="text-sm">DOT / 3PMSF</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Kennzeichnungen</h3>
+            <p class="text-white/75 m-0">Was steht auf dem Reifen, was heißt es.</p>
+            <a class="lg-open mt-auto" href="#kennz">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable" data-id="info">
+            <div class="flex items-center gap-2 text-white/70">
+              <i data-feather="info" class="w-4 h-4"></i><span class="text-sm">Hinweise</span>
+            </div>
+            <h3 class="text-lg font-bold m-0">Info</h3>
+            <p class="text-white/75 m-0">Tacho, Übersetzung, Freigaben.</p>
+            <a class="lg-open mt-auto" href="#info">Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i></a>
+          </article>
+        </div>
+
+        <div id="empty" class="opacity-75 text-center p-4 border border-dashed border-white/15 rounded-xl hidden" aria-live="polite">
+          Keine Treffer
+        </div>
+      </section>
+
+      <!-- ===== CONTENT ===== -->
+      <section id="rechner" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <i data-feather="cpu" class="w-5 h-5 text-sky-300"></i><span>Reifenrechner</span>
+          </h2>
+          <p class="text-white/60 text-sm mb-4">
+            Gib Breite (mm), Höhe (%) und Felge (Zoll) ein. Außen-Ø und Umfang werden live berechnet.
+          </p>
+
+          <div class="flex gap-2 flex-wrap mb-4">
+            <button class="lg-btn" id="addRowBtn"><i data-feather="plus" class="w-4 h-4"></i><span>Zeile hinzufügen</span></button>
+            <button class="lg-btn" id="clearBtn"><i data-feather="x-circle" class="w-4 h-4"></i><span>Alle Eingaben löschen</span></button>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-lg p-3 overflow-auto">
+            <table class="w-full text-sm border-collapse" id="tbl">
+              <thead>
+                <tr class="text-white/75">
+                  <th class="text-left p-2 border-b border-white/10 w-10">#</th>
+                  <th class="text-left p-2 border-b border-white/10">Breite (mm)</th>
+                  <th class="text-left p-2 border-b border-white/10">Höhe (%)</th>
+                  <th class="text-left p-2 border-b border-white/10">Felge (Zoll)</th>
+                  <th class="text-left p-2 border-b border-white/10 hidden md:table-cell">Höhe/Flanke (mm)</th>
+                  <th class="text-left p-2 border-b border-white/10">Innen-Ø (mm)</th>
+                  <th class="text-left p-2 border-b border-white/10">Außen-Ø (mm)</th>
+                  <th class="text-left p-2 border-b border-white/10">Umfang (mm)</th>
+                  <th class="text-left p-2 border-b border-white/10 hidden md:table-cell">Außen-Ø (m)</th>
+                  <th class="text-left p-2 border-b border-white/10 hidden md:table-cell">Umfang (m)</th>
+                  <th class="text-left p-2 border-b border-white/10 w-16"></th>
+                </tr>
+              </thead>
+              <tbody id="body" class="text-white/75"></tbody>
+            </table>
+          </div>
+
+          <div class="mt-3 text-white/60 text-sm">
+            Formeln: Flankenhöhe = Breite × (Höhe%/100) · Innen-Ø = Felge(Zoll) × 25,4 · Außen-Ø = Innen-Ø + 2 × Flankenhöhe · Umfang = π × Außen-Ø.
+          </div>
+
+          <div class="mt-3 liquid-glass lg-chip lg-radius-md p-3 text-white/75">
+            <b>Warum wichtig?</b> Größerer Außen-Ø ⇒ größerer Abrollumfang ⇒ Tacho kann abweichen, Übersetzung ändert sich, Bodenfreiheit & Freigängigkeit auch. Freigaben/ABE beachten.
+          </div>
+        </div>
+      </section>
+
+      <section id="bremsweg" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <i data-feather="activity" class="w-5 h-5 text-emerald-300"></i><span>Bremsweg-Rechner</span>
+          </h2>
+          <p class="text-white/60 text-sm mb-4">
+            Reaktionsweg + Bremsweg. Fahrzeugklasse wirkt als Faktor auf den Bremsanteil. Optional Dimension (für Außen-Ø Anzeige).
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="text-white/75 text-sm">Geschwindigkeit (km/h)
+              <input id="v_kmh" type="number" min="0" step="1" value="100"
+                class="mt-1 w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2.5 focus:outline-none focus:border-white/20">
+            </label>
+
+            <label class="text-white/75 text-sm">Reaktionszeit (s)
+              <input id="t_react" type="number" min="0" step="0.1" value="1.0"
+                class="mt-1 w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2.5 focus:outline-none focus:border-white/20">
+            </label>
+
+            <label class="text-white/75 text-sm">Fahrbahn
+              <select id="surface"
+                class="mt-1 w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2.5 focus:outline-none focus:border-white/20">
+                <option value="0.8">Trocken (µ≈0,8)</option>
+                <option value="0.5">Nass (µ≈0,5)</option>
+                <option value="0.3">Schnee (µ≈0,3)</option>
+                <option value="0.15">Eis (µ≈0,15)</option>
+              </select>
+            </label>
+
+            <label class="text-white/75 text-sm">Reifendimension (optional)
+              <input id="dim" type="text" placeholder="z. B. 205/60 R16"
+                class="mt-1 w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2.5 focus:outline-none focus:border-white/20">
+            </label>
+
+            <label class="text-white/75 text-sm">Fahrzeugklasse (Faktor)
+              <select id="vehClass"
+                class="mt-1 w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2.5 focus:outline-none focus:border-white/20">
+                <option value="1.0">PKW / Van (×1.00)</option>
+                <option value="0.9">Motorrad (×0.90)</option>
+                <option value="1.15">Kombi/volle Beladung (×1.15)</option>
+                <option value="1.25">SUV/leichter Transporter (×1.25)</option>
+                <option value="1.4">LKW (×1.40)</option>
+              </select>
+            </label>
+
+            <label class="text-white/75 text-sm">ABS
+              <select id="abs"
+                class="mt-1 w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2.5 focus:outline-none focus:border-white/20">
+                <option value="1">Ja</option>
+                <option value="1.1">Nein (×1.10)</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+            <div class="liquid-glass lg-chip lg-radius-md p-3">
+              <div class="text-white/60 text-xs">Außen-Ø (mm)</div>
+              <div class="text-xl font-extrabold" id="d_out">–</div>
+            </div>
+            <div class="liquid-glass lg-chip lg-radius-md p-3">
+              <div class="text-white/60 text-xs">Reaktionsweg (m)</div>
+              <div class="text-xl font-extrabold" id="s_react">–</div>
+            </div>
+            <div class="liquid-glass lg-chip lg-radius-md p-3">
+              <div class="text-white/60 text-xs">Bremsweg (m)</div>
+              <div class="text-xl font-extrabold" id="s_brake">–</div>
+            </div>
+            <div class="liquid-glass lg-chip lg-radius-md p-3">
+              <div class="text-white/60 text-xs">Anhalteweg (m)</div>
+              <div class="text-xl font-extrabold" id="s_total">–</div>
+            </div>
+          </div>
+
+          <p class="text-white/60 text-sm mt-3">
+            Modelle: Reaktionsweg = v·t. Bremsweg = v²/(2·µ·g) · Fahrzeugfaktor · ABS-Faktor, g=9,81 m/s².
+          </p>
+        </div>
+      </section>
+
+      <section id="indices" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <i data-feather="tag" class="w-5 h-5 text-sky-300"></i><span>Indizes</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="liquid-glass lg-card lg-radius-lg p-3 overflow-auto">
+              <h3 class="font-bold px-1 pb-2">Geschwindigkeitsindex (km/h)</h3>
+              <table class="w-full text-sm border-collapse">
+                <thead><tr><th class="text-left p-2 border-b border-white/10">Index</th><th class="text-left p-2 border-b border-white/10">km/h</th></tr></thead>
+                <tbody class="text-white/75">
+                  <tr><td class="p-2 border-b border-white/10">J</td><td class="p-2 border-b border-white/10">100</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">K</td><td class="p-2 border-b border-white/10">110</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">L</td><td class="p-2 border-b border-white/10">120</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">M</td><td class="p-2 border-b border-white/10">130</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">N</td><td class="p-2 border-b border-white/10">140</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">P</td><td class="p-2 border-b border-white/10">150</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">Q</td><td class="p-2 border-b border-white/10">160</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">R</td><td class="p-2 border-b border-white/10">170</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">S</td><td class="p-2 border-b border-white/10">180</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">T</td><td class="p-2 border-b border-white/10">190</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">U</td><td class="p-2 border-b border-white/10">200</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">H</td><td class="p-2 border-b border-white/10">210</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">V</td><td class="p-2 border-b border-white/10">240</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">W</td><td class="p-2 border-b border-white/10">270</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">Y</td><td class="p-2 border-b border-white/10">300</td></tr>
+                  <tr><td class="p-2">(Y)</td><td class="p-2">&gt;300</td></tr>
+                </tbody>
+              </table>
+              <p class="text-white/60 text-sm mt-2 px-1">ZR historisch &gt;240 km/h; heute W, Y bzw. (Y).</p>
+            </div>
+
+            <div class="liquid-glass lg-card lg-radius-lg p-3 overflow-auto">
+              <h3 class="font-bold px-1 pb-2">Tragfähigkeitsindex (kg pro Reifen)</h3>
+              <table class="w-full text-sm border-collapse">
+                <thead><tr><th class="text-left p-2 border-b border-white/10">LI</th><th class="text-left p-2 border-b border-white/10">kg</th><th class="text-left p-2 border-b border-white/10">LI</th><th class="text-left p-2 border-b border-white/10">kg</th></tr></thead>
+                <tbody class="text-white/75">
+                  <tr><td class="p-2 border-b border-white/10">70</td><td class="p-2 border-b border-white/10">335</td><td class="p-2 border-b border-white/10">95</td><td class="p-2 border-b border-white/10">690</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">71</td><td class="p-2 border-b border-white/10">345</td><td class="p-2 border-b border-white/10">96</td><td class="p-2 border-b border-white/10">710</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">72</td><td class="p-2 border-b border-white/10">355</td><td class="p-2 border-b border-white/10">97</td><td class="p-2 border-b border-white/10">730</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">73</td><td class="p-2 border-b border-white/10">365</td><td class="p-2 border-b border-white/10">98</td><td class="p-2 border-b border-white/10">750</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">74</td><td class="p-2 border-b border-white/10">375</td><td class="p-2 border-b border-white/10">99</td><td class="p-2 border-b border-white/10">775</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">75</td><td class="p-2 border-b border-white/10">387</td><td class="p-2 border-b border-white/10">100</td><td class="p-2 border-b border-white/10">800</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">76</td><td class="p-2 border-b border-white/10">400</td><td class="p-2 border-b border-white/10">101</td><td class="p-2 border-b border-white/10">825</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">77</td><td class="p-2 border-b border-white/10">412</td><td class="p-2 border-b border-white/10">102</td><td class="p-2 border-b border-white/10">850</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">78</td><td class="p-2 border-b border-white/10">425</td><td class="p-2 border-b border-white/10">103</td><td class="p-2 border-b border-white/10">875</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">79</td><td class="p-2 border-b border-white/10">437</td><td class="p-2 border-b border-white/10">104</td><td class="p-2 border-b border-white/10">900</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">80</td><td class="p-2 border-b border-white/10">450</td><td class="p-2 border-b border-white/10">105</td><td class="p-2 border-b border-white/10">925</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">81</td><td class="p-2 border-b border-white/10">462</td><td class="p-2 border-b border-white/10">106</td><td class="p-2 border-b border-white/10">950</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">82</td><td class="p-2 border-b border-white/10">475</td><td class="p-2 border-b border-white/10">107</td><td class="p-2 border-b border-white/10">975</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">83</td><td class="p-2 border-b border-white/10">487</td><td class="p-2 border-b border-white/10">108</td><td class="p-2 border-b border-white/10">1000</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">84</td><td class="p-2 border-b border-white/10">500</td><td class="p-2 border-b border-white/10">109</td><td class="p-2 border-b border-white/10">1030</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">85</td><td class="p-2 border-b border-white/10">515</td><td class="p-2 border-b border-white/10">110</td><td class="p-2 border-b border-white/10">1060</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">86</td><td class="p-2 border-b border-white/10">530</td><td class="p-2 border-b border-white/10">111</td><td class="p-2 border-b border-white/10">1090</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">87</td><td class="p-2 border-b border-white/10">545</td><td class="p-2 border-b border-white/10">112</td><td class="p-2 border-b border-white/10">1120</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">88</td><td class="p-2 border-b border-white/10">560</td><td class="p-2 border-b border-white/10">113</td><td class="p-2 border-b border-white/10">1150</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">89</td><td class="p-2 border-b border-white/10">580</td><td class="p-2 border-b border-white/10">114</td><td class="p-2 border-b border-white/10">1180</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">90</td><td class="p-2 border-b border-white/10">600</td><td class="p-2 border-b border-white/10">115</td><td class="p-2 border-b border-white/10">1215</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">91</td><td class="p-2 border-b border-white/10">615</td><td class="p-2 border-b border-white/10">116</td><td class="p-2 border-b border-white/10">1250</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">92</td><td class="p-2 border-b border-white/10">630</td><td class="p-2 border-b border-white/10">117</td><td class="p-2 border-b border-white/10">1285</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">93</td><td class="p-2 border-b border-white/10">650</td><td class="p-2 border-b border-white/10">118</td><td class="p-2 border-b border-white/10">1320</td></tr>
+                  <tr><td class="p-2 border-b border-white/10">94</td><td class="p-2 border-b border-white/10">670</td><td class="p-2 border-b border-white/10">119</td><td class="p-2 border-b border-white/10">1360</td></tr>
+                  <tr><td class="p-2"></td><td class="p-2"></td><td class="p-2">120</td><td class="p-2">1400</td></tr>
+                </tbody>
+              </table>
+              <p class="text-white/60 text-sm mt-2 px-1">Tragfähigkeit gilt pro Reifen; Gesamtlast inkl. Reserve beachten.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="kennz" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <i data-feather="image" class="w-5 h-5 text-indigo-300"></i><span>Reifenkennzeichnungen</span>
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div class="liquid-glass lg-card lg-radius-lg p-3">
+              <img src="Bilder/Reifen.png" alt="Reifen mit Beschriftungen" class="w-full max-w-full rounded-lg border border-white/10">
+              <div class="text-white/60 text-sm mt-2">Bild: Reifenbeschriftung (Übersicht)</div>
+            </div>
+
+            <div class="liquid-glass lg-card lg-radius-lg p-3">
+              <img src="Bilder/ReifenaufbauInnen.jpg" alt="Reifenaufbau innen" class="w-full max-w-full rounded-lg border border-white/10">
+              <div class="text-white/60 text-sm mt-2">Bild: Reifenaufbau innen</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-lg p-3 overflow-auto mt-4">
+            <table class="w-full text-sm border-collapse">
+              <thead><tr><th class="text-left p-2 border-b border-white/10">Kennzeichnung</th><th class="text-left p-2 border-b border-white/10">Bedeutung</th></tr></thead>
+              <tbody class="text-white/75">
+                <tr><td class="p-2 border-b border-white/10">205</td><td class="p-2 border-b border-white/10">Reifenbreite in mm</td></tr>
+                <tr><td class="p-2 border-b border-white/10">60</td><td class="p-2 border-b border-white/10">Höhe = 60 % der Breite (123 mm bei 205 mm Breite)</td></tr>
+                <tr><td class="p-2 border-b border-white/10">R</td><td class="p-2 border-b border-white/10">Radialbauweise</td></tr>
+                <tr><td class="p-2 border-b border-white/10">16</td><td class="p-2 border-b border-white/10">Felgendurchmesser in Zoll (16 = 406,4 mm)</td></tr>
+                <tr><td class="p-2 border-b border-white/10">96</td><td class="p-2 border-b border-white/10">Tragfähigkeitsindex (710 kg pro Reifen)</td></tr>
+                <tr><td class="p-2 border-b border-white/10">H</td><td class="p-2 border-b border-white/10">Geschwindigkeitsindex (bis 210 km/h)</td></tr>
+                <tr><td class="p-2 border-b border-white/10">DOT 1523</td><td class="p-2 border-b border-white/10">Produktionsdatum: Woche 15, Jahr 2023</td></tr>
+                <tr><td class="p-2 border-b border-white/10">E4</td><td class="p-2 border-b border-white/10">ECE-Prüfzeichen (hier Niederlande)</td></tr>
+                <tr><td class="p-2 border-b border-white/10">M+S / 3PMSF</td><td class="p-2 border-b border-white/10">Winterreifenkennzeichnung</td></tr>
+                <tr><td class="p-2 border-b border-white/10">XL / Reinforced</td><td class="p-2 border-b border-white/10">Verstärkte Tragfähigkeit</td></tr>
+                <tr><td class="p-2">Tubeless</td><td class="p-2">Schlauchloser Reifen</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="info" class="mt-6 scroll-mt-24">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 md:p-5">
+          <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <i data-feather="info" class="w-5 h-5 text-sky-300"></i><span>Info</span>
+          </h2>
+          <p class="text-white/75 m-0">
+            Die Reifendimension beeinflusst Außen-Ø, Abrollumfang, Tacho, Drehzahl und Bodenfreiheit. Immer die Fahrzeug-Freigaben beachten.
+          </p>
+        </div>
+      </section>
+
+      <div class="text-white/60 text-xs text-center my-10">
+        <div class="liquid-glass lg-chip lg-radius-pill inline-flex items-center gap-2 px-4 py-2">
+          <span>© LearnCraft Pro</span>
+          <span class="w-1 h-1 rounded-full bg-white/30"></span>
+          <span>ReifenPRO</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Bar: NUR 3 Buttons (Home, Übersicht, Theme) -->
+  <nav id="bottomBar" class="liquid-glass bottom-bar lg-radius-pill" aria-label="Navigation">
+    <a class="bar-item active" href="Index.html" aria-label="Home">
+      <i data-feather="home" class="bar-icon"></i>
+      <span class="bar-label">Home</span>
+    </a>
+
+    <a class="bar-item" href="#overview" data-target="overview" aria-label="Übersicht">
+      <i data-feather="grid" class="bar-icon"></i>
+      <span class="bar-label">Übersicht</span>
+    </a>
+
+    <button id="themeToggle" class="bar-item" type="button" aria-label="Theme wechseln">
+      <i id="themeIcon" data-feather="sun" class="bar-icon"></i>
+      <span class="bar-label">Theme</span>
+    </button>
+  </nav>
+
+  <div id="scrollProgress"></div>
+
+  <script>
+    // Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.feather) feather.replace();
+    });
+
+    // Theme (lesbar dank CSS overrides oben)
+    (function themeInit(){
+      const html = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      function applyTheme(mode){
+        html.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+        if (icon) icon.setAttribute('data-feather', mode === 'dark' ? 'sun' : 'moon');
+        if (window.feather) feather.replace();
+      }
+      applyTheme(localStorage.getItem('theme') || 'dark');
+      btn?.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+
+    // Date/Time
+    function updateDateTime() {
+      const now = new Date();
+      const d = document.getElementById('date');
+      const t = document.getElementById('time');
+      if (d) d.textContent = now.toLocaleDateString('de-CH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      if (t) t.textContent = now.toLocaleTimeString('de-CH');
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Weather (simple)
+    async function fetchWeather(){
+      try{
+        const res = await fetch('https://wttr.in/Bern?format=%25C|%25t', {cache:'no-store'});
+        const text = await res.text();
+        const [c,temp] = (text||'').split('|');
+        const wxT = document.getElementById('wxText');
+        const wxTemp = document.getElementById('wxTemp');
+        if (wxT) wxT.textContent = c || '–';
+        if (wxTemp) wxTemp.textContent = (temp||'–').replace('+','');
+      }catch(e){}
+    }
+    fetchWeather();
+
+    // Smooth anchor scroll (mobile friendly)
+    document.addEventListener('click', (e)=>{
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+
+    // Search filters overview cards
+    const searchInput = document.getElementById('q');
+    const grid = document.getElementById('grid');
+    const emptyState = document.getElementById('empty');
+    const cards = grid ? [...grid.querySelectorAll('.searchable')] : [];
+
+    function normalize(text) {
+      return (text || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+    }
+    function performSearch() {
+      const q = normalize((searchInput?.value || '').trim());
+      let has = false;
+      cards.forEach(card => {
+        const text = normalize(card.innerText);
+        const ok = !q || text.includes(q);
+        card.style.display = ok ? 'flex' : 'none';
+        if (ok) has = true;
+      });
+      if (emptyState) emptyState.style.display = has ? 'none' : 'block';
+    }
+    searchInput?.addEventListener('input', performSearch);
+
+    // Cards vs List (only changes overview layout)
+    const viewCardsBtn = document.getElementById('viewCards');
+    const viewListBtn  = document.getElementById('viewList');
+
+    function setView(isList){
+      if (!grid) return;
+      grid.classList.toggle('grid-cols-1', true);
+      grid.classList.toggle('sm:grid-cols-2', !isList);
+      grid.classList.toggle('lg:grid-cols-3', !isList);
+      grid.classList.toggle('gap-1', isList);
+      grid.classList.toggle('gap-4', !isList);
+      viewCardsBtn?.setAttribute('aria-pressed', String(!isList));
+      viewListBtn?.setAttribute('aria-pressed', String(isList));
+    }
+    viewCardsBtn?.addEventListener('click', () => setView(false));
+    viewListBtn?.addEventListener('click', () => setView(true));
+
+    // Bottom bar active state (only highlight "Übersicht" when overview in view)
+    (function barActive(){
+      const overviewBtn = document.querySelector('#bottomBar a[data-target="overview"]');
+      const overview = document.getElementById('overview');
+      if (!overviewBtn || !overview) return;
+
+      const obs = new IntersectionObserver((entries)=>{
+        const v = entries[0];
+        const isActive = !!v?.isIntersecting;
+        overviewBtn.classList.toggle('active', isActive);
+      }, { rootMargin: '-40% 0px -55% 0px', threshold: 0.08 });
+
+      obs.observe(overview);
+    })();
+
+    // Scroll progress
+    (function(){
+      const progress = document.getElementById('scrollProgress');
+      const onScroll = () => {
+        const h = document.documentElement;
+        const denom = (h.scrollHeight - h.clientHeight) || 1;
+        progress.style.width = (h.scrollTop / denom * 100).toFixed(2) + '%';
+      };
+      document.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    })();
+
+    /* ====== Reifenrechner (aus deiner alten Seite, nur optisch neu) ====== */
+    (() => {
+      const $  = (sel, root=document) => root.querySelector(sel);
+
+      const bodyEl    = $('#body');
+      const addRowBtn = $('#addRowBtn');
+      const clearBtn  = $('#clearBtn');
+
+      function fmt(x, digits=2){ return isFinite(x) ? x.toFixed(digits).replace('.', ',') : '–'; }
+      function parseNum(v){ if(v==null||v==='') return NaN; return parseFloat(String(v).replace(',', '.')); }
+
+      function bindRow(tr){
+        tr.addEventListener('input', (e)=>{
+          if(e.target.matches('.w,.ar,.rim')) calcRow(tr);
+        });
+        tr.querySelector('.delBtn').addEventListener('click', ()=>{
+          if(bodyEl.querySelectorAll('tr').length > 1){ tr.remove(); renumber(); }
+        });
+      }
+
+      function renumber(){
+        [...bodyEl.querySelectorAll('.idx')].forEach((td,i)=> td.textContent = i+1);
+        const rows = bodyEl.querySelectorAll('tr');
+        rows.forEach(tr=>{
+          const btn = tr.querySelector('.delBtn');
+          const one = rows.length === 1;
+          btn.disabled = one;
+          btn.style.opacity = one ? .5 : 1;
+          btn.style.cursor  = one ? 'default' : 'pointer';
+        });
+      }
+
+      function makeRow(values){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="idx p-2 border-b border-white/10"></td>
+          <td class="p-2 border-b border-white/10">
+            <input class="w w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-white/20"
+              type="text" inputmode="decimal" placeholder="z. B. 205" value="${values?.w ?? ''}">
+          </td>
+          <td class="p-2 border-b border-white/10">
+            <input class="ar w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-white/20"
+              type="text" inputmode="decimal" placeholder="z. B. 60" value="${values?.ar ?? ''}">
+          </td>
+          <td class="p-2 border-b border-white/10">
+            <input class="rim w-full bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-white/20"
+              type="text" inputmode="decimal" placeholder="z. B. 16" value="${values?.rim ?? ''}">
+          </td>
+          <td class="p-2 border-b border-white/10 hidden md:table-cell"><span class="out h liquid-glass lg-chip lg-radius-md px-2 py-1 inline-flex">0,00</span></td>
+          <td class="p-2 border-b border-white/10"><span class="out inner liquid-glass lg-chip lg-radius-md px-2 py-1 inline-flex">0,00</span></td>
+          <td class="p-2 border-b border-white/10"><span class="out outer liquid-glass lg-chip lg-radius-md px-2 py-1 inline-flex">0,00</span></td>
+          <td class="p-2 border-b border-white/10"><span class="out circ liquid-glass lg-chip lg-radius-md px-2 py-1 inline-flex">0,00</span></td>
+          <td class="p-2 border-b border-white/10 hidden md:table-cell"><span class="out outer_m liquid-glass lg-chip lg-radius-md px-2 py-1 inline-flex">0,00</span></td>
+          <td class="p-2 border-b border-white/10 hidden md:table-cell"><span class="out circ_m liquid-glass lg-chip lg-radius-md px-2 py-1 inline-flex">0,00</span></td>
+          <td class="p-2 border-b border-white/10">
+            <button class="delBtn lg-btn" title="Zeile löschen">✕</button>
+          </td>
+        `;
+        bindRow(tr);
+        bodyEl.appendChild(tr);
+        renumber();
+        calcRow(tr);
+      }
+
+      function calcRow(tr){
+        const w   = parseNum(tr.querySelector('.w').value)   || 0;
+        const ar  = parseNum(tr.querySelector('.ar').value)  || 0;
+        const rim = parseNum(tr.querySelector('.rim').value) || 0;
+        const h     = w * (ar/100);
+        const inner = rim * 25.4;
+        const outer = inner + 2*h;
+        const circ  = Math.PI * outer;
+        tr.querySelector('.h').textContent       = fmt(h);
+        tr.querySelector('.inner').textContent   = fmt(inner);
+        tr.querySelector('.outer').textContent   = fmt(outer);
+        tr.querySelector('.circ').textContent    = fmt(circ);
+        tr.querySelector('.outer_m').textContent = fmt(outer/1000);
+        tr.querySelector('.circ_m').textContent  = fmt(circ/1000);
+      }
+
+      addRowBtn.addEventListener('click', ()=> makeRow());
+      clearBtn.addEventListener('click', ()=>{
+        [...bodyEl.querySelectorAll('input')].forEach(inp => inp.value = '');
+        [...bodyEl.querySelectorAll('tr')].forEach(calcRow);
+      });
+
+      // Startwerte
+      makeRow({w:'200', ar:'50', rim:'18'});
+      makeRow({w:'175', ar:'65', rim:'14'});
+      makeRow({w:'255', ar:'35', rim:'19'});
+    })();
+
+    /* ====== Bremsweg-Rechner (aus deiner alten Seite) ====== */
+    (() => {
+      const v_kmh   = document.getElementById('v_kmh');
+      const t_react = document.getElementById('t_react');
+      const surface = document.getElementById('surface');
+      const dim     = document.getElementById('dim');
+      const vehClass= document.getElementById('vehClass');
+      const absSel  = document.getElementById('abs');
+
+      const d_out   = document.getElementById('d_out');
+      const s_react = document.getElementById('s_react');
+      const s_brake = document.getElementById('s_brake');
+      const s_total = document.getElementById('s_total');
+
+      function parseDimension(text){
+        if(!text) return null;
+        const m = text.trim().toUpperCase().match(/(\d{3})\s*\/\s*(\d{2})\s*R\s*(\d{2})/);
+        if(!m) return null;
+        const w = parseFloat(m[1]), ar = parseFloat(m[2]), rim = parseFloat(m[3]);
+        const h = w*(ar/100), inner = rim*25.4, outer = inner + 2*h; // mm
+        return {w, ar, rim, outer};
+      }
+
+      function calcBrake(){
+        const v = parseFloat(String(v_kmh.value).replace(',', '.')) || 0;
+        const t = parseFloat(String(t_react.value).replace(',', '.')) || 0;
+        const mu = parseFloat(surface.value) || 0.8;
+        const g = 9.81;
+        const v_ms = v/3.6;
+
+        const sReact = v_ms * t;
+        let sBrake = (v_ms*v_ms) / (2*mu*g);
+
+        const fVeh = parseFloat(vehClass.value) || 1.0;
+        const fABS = parseFloat(absSel.value) || 1.0;
+        sBrake = sBrake * fVeh * fABS;
+
+        const sTotal = sReact + sBrake;
+
+        s_react.textContent = sReact.toFixed(2).replace('.', ',');
+        s_brake.textContent = sBrake.toFixed(2).replace('.', ',');
+        s_total.textContent = sTotal.toFixed(2).replace('.', ',');
+
+        const dimVals = parseDimension(dim.value);
+        d_out.textContent = dimVals ? String(Math.round(dimVals.outer)) : '–';
+      }
+
+      [v_kmh, t_react, surface, dim, vehClass, absSel].forEach(el => el.addEventListener('input', calcBrake));
+      calcBrake();
+    })();
+  </script>
+</body>
+</html>

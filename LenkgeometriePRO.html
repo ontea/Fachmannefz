@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4.1.05 LenkgeometriePRO – Winkel & Diagnose</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+
+  <script defer src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <style>
+    .hidden{display:none!important;}
+    details.lg-details > summary{
+      list-style:none;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    html[data-theme="light"] details.lg-details > summary{
+      background: rgba(255,255,255,0.70);
+      border-color: rgba(0,0,0,0.10);
+    }
+    details.lg-details[open] > summary{ background: rgba(107,114,128,0.18); border-color: rgba(107,114,128,0.35); }
+    details.lg-details > summary::-webkit-details-marker{display:none;}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+    }
+    html[data-theme="light"] .kbd{ border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.04); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .mini-note{ font-size: 12px; opacity: .82; }
+    .calc-out{ font-weight: 800; }
+    .svg-diagram{
+      width:100%;
+      max-width: 740px;
+      margin: 10px auto 0;
+      display:block;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+    }
+    html[data-theme="light"] .svg-diagram{
+      border-color: rgba(0,0,0,0.10);
+      background: rgba(0,0,0,0.03);
+    }
+  </style>
+</head>
+
+<body class="app">
+  <!-- SVG Filter: “liquid / distortion” -->
+  <svg class="svg-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="glass-distortion">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <main class="page-wrap">
+    <div class="max-w-5xl mx-auto p-5">
+
+      <!-- Widgets -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="calendar" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Datum</p>
+              <div class="font-extrabold" id="date">–</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="clock" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Zeit</p>
+              <div class="font-extrabold" id="time">–</div>
+            </div>
+          </div>
+
+          <div class="lg-divider"></div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="cloud" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Weather · Bern</p>
+              <div class="font-extrabold"><span id="wxText">–</span> · <span id="wxTemp">–°C</span></div>
+            </div>
+          </div>
+
+          <div class="lg-divider"></div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="alert-triangle" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Merksatz</p>
+              <div class="font-extrabold">Spur frisst Reifen. Nachlauf macht Geradeauslauf.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6 sticky top-2 md:top-4 z-20">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="relative flex-1 min-w-[220px]">
+            <i data-feather="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4"></i>
+            <input id="q" type="search" placeholder="LenkgeometriePRO durchsuchen..."
+              class="w-full bg-white/5 text-white border border-white/10 rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10">
+          </div>
+
+          <div class="flex gap-2">
+            <button id="viewCards" aria-pressed="true" class="lg-btn">
+              <i data-feather="grid" class="w-4 h-4"></i><span>Karten</span>
+            </button>
+            <button id="viewList" aria-pressed="false" class="lg-btn">
+              <i data-feather="list" class="w-4 h-4"></i><span>Liste</span>
+            </button>
+          </div>
+
+          <a href="#rechner" class="lg-btn">
+            <i data-feather="cpu" class="w-4 h-4"></i><span>Rechner</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Hero -->
+      <header class="liquid-glass lg-surface lg-radius-2xl p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-2 liquid-glass lg-chip lg-radius-pill px-3 py-1 mb-3">
+              <i data-feather="navigation" class="w-4 h-4"></i>
+              <span class="font-semibold">4.1.05 · Lenkgeometrie – Winkel</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+              LenkgeometriePRO
+            </h1>
+            <p class="lg-muted mt-2 max-w-2xl">
+              Kurz, sauber, lehrlings-tauglich: Begriffe, Wirkungen, typische Fehlerbilder und die Aufgaben-Lösungen
+              (zum Ausklappen). Ohne Magie, nur Physik und Schrauber-Realität.
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+            <a class="lg-btn" href="#spicker"><i data-feather="bookmark" class="w-4 h-4"></i><span>Spicker</span></a>
+            <a class="lg-btn" href="#aufgaben"><i data-feather="check-circle" class="w-4 h-4"></i><span>Aufgaben</span></a>
+          </div>
+        </div>
+      </header>
+
+      <!-- Overview -->
+      <section id="overview" class="mb-10">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-extrabold">Übersicht</h2>
+          <div class="text-sm lg-muted">Klick = springt hin</div>
+        </div>
+
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Cards -->
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="spicker">
+            <div class="lg-badge static">Start</div>
+            <h3 class="text-lg font-extrabold mt-1">Spicker</h3>
+            <p class="lg-muted mt-1">Definitionen + Blickrichtung + Vorzeichen.</p>
+            <a class="lg-open mt-4" href="#spicker"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="grundlagen">
+            <div class="lg-badge static">01</div>
+            <h3 class="text-lg font-extrabold mt-1">Grundlagen</h3>
+            <p class="lg-muted mt-1">Spurweite, Achsabstand, Mehrspurig.</p>
+            <a class="lg-open mt-4" href="#grundlagen"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="spur">
+            <div class="lg-badge static">02</div>
+            <h3 class="text-lg font-extrabold mt-1">Spur (Toe)</h3>
+            <p class="lg-muted mt-1">Vorspur/Nachspur, Spurplatte, Verschleiss.</p>
+            <a class="lg-open mt-4" href="#spur"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="sturz">
+            <div class="lg-badge static">04</div>
+            <h3 class="text-lg font-extrabold mt-1">Sturz (Camber)</h3>
+            <p class="lg-muted mt-1">Kurve vs. Reifenbild, Spurplatte-Effekt.</p>
+            <a class="lg-open mt-4" href="#sturz"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="spreizung">
+            <div class="lg-badge static">05</div>
+            <h3 class="text-lg font-extrabold mt-1">Spreizung (SAI)</h3>
+            <p class="lg-muted mt-1">Lenkachse, Platzbedarf, Basis für Lenkrollradius.</p>
+            <a class="lg-open mt-4" href="#spreizung"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="lenkrollradius">
+            <div class="lg-badge static">06</div>
+            <h3 class="text-lg font-extrabold mt-1">Lenkrollradius</h3>
+            <p class="lg-muted mt-1">Positiv/0/negativ, Bremsen, Rückstellmoment.</p>
+            <a class="lg-open mt-4" href="#lenkrollradius"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="nachlauf">
+            <div class="lg-badge static">07</div>
+            <h3 class="text-lg font-extrabold mt-1">Nachlauf (Caster)</h3>
+            <p class="lg-muted mt-1">Zieh-Effekt, Stabilität, „Lenkung wird schwerer“.</p>
+            <a class="lg-open mt-4" href="#nachlauf"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="ackermann">
+            <div class="lg-badge static">03/08</div>
+            <h3 class="text-lg font-extrabold mt-1">Spurdifferenz</h3>
+            <p class="lg-muted mt-1">Ackermann, Innen/Aussen, Spurdifferenzwinkel δ.</p>
+            <a class="lg-open mt-4" href="#ackermann"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="kombiwinkel">
+            <div class="lg-badge static">09</div>
+            <h3 class="text-lg font-extrabold mt-1">Kombinierter Winkel</h3>
+            <p class="lg-muted mt-1">Sturz + Spreizung, Diagnose nach Unfall.</p>
+            <a class="lg-open mt-4" href="#kombiwinkel"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="achsversatz">
+            <div class="lg-badge static">10</div>
+            <h3 class="text-lg font-extrabold mt-1">Symmetrieachse & Achsversatz</h3>
+            <p class="lg-muted mt-1">Bezugsachse, „crabbing“, Radversatz.</p>
+            <a class="lg-open mt-4" href="#achsversatz"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="fahrachse">
+            <div class="lg-badge static">11</div>
+            <h3 class="text-lg font-extrabold mt-1">Geometrische Fahrachse</h3>
+            <p class="lg-muted mt-1">Warum man vorne „auf hinten“ einstellt.</p>
+            <a class="lg-open mt-4" href="#fahrachse"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="rechner">
+            <div class="lg-badge static">Tools</div>
+            <h3 class="text-lg font-extrabold mt-1">Rechner</h3>
+            <p class="lg-muted mt-1">Spurplatte, Ackermann-Kreis, ET-Effekt, Toe mm↔°.</p>
+            <a class="lg-open mt-4" href="#rechner"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+
+          <article class="liquid-glass lg-card lg-radius-2xl p-4 flex flex-col" data-id="aufgaben">
+            <div class="lg-badge static">AB</div>
+            <h3 class="text-lg font-extrabold mt-1">Aufgaben & Lösungen</h3>
+            <p class="lg-muted mt-1">Alles aus den Blättern, ausklappbar.</p>
+            <a class="lg-open mt-4" href="#aufgaben"><i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span></a>
+          </article>
+        </div>
+
+        <div id="empty" class="hidden liquid-glass lg-surface lg-radius-xl p-5 mt-4 text-center">
+          <p class="font-bold">Kein Treffer.</p>
+          <p class="lg-muted">Tipp: Such nach „Spur“, „Sturz“, „Nachlauf“, „δ“ oder „ET“.</p>
+        </div>
+      </section>
+
+      <!-- Spicker -->
+      <section id="spicker" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold">Spicker: Begriffe in 60 Sekunden</h2>
+            <p class="lg-muted mt-2">Wenn du nur das hier lernst, bist du schon weiter als viele, die „einfach mal Spur stellen“.</p>
+          </div>
+          <span class="liquid-glass lg-chip lg-radius-pill px-3 py-1 font-semibold">Blickrichtungen</span>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Von oben (Draufsicht)</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>Spur</b>: Rad zeigt nach innen/außen.</li>
+              <li><b>Positive Spur</b> = <b>Vorspur (toe-in)</b> (Vorderkanten näher zusammen).</li>
+              <li><b>Negative Spur</b> = <b>Nachspur / toe-out</b> (Vorderkanten weiter auseinander).</li>
+              <li><b>Geometrische Fahrachse</b>: Richtung, in die das Fahrzeug wirklich „schiebt/zieht“ (meist aus Hinterachse).</li>
+            </ul>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Von vorne / von der Seite</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>Sturz</b> (Frontansicht): Neigung des Rades zur Senkrechten.</li>
+              <li><b>Negativ</b> = oben nach innen. <b>Positiv</b> = oben nach außen.</li>
+              <li><b>Nachlauf (Caster)</b> (Seitenansicht): Neigung der <b>Lenkachse</b> zur Senkrechten.</li>
+              <li><b>Spreizung (SAI/KPI)</b> (Frontansicht): Neigung der <b>Lenkachse</b> zur Senkrechten.</li>
+              <li><b>Lenkrollradius</b>: Abstand am Boden zwischen Lenkachsen-Schnittpunkt und Reifenaufstandsmitte.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- mini diagram: toe -->
+        <svg class="svg-diagram" viewBox="0 0 900 280" role="img" aria-label="Draufsicht: Toe-in und Toe-out">
+          <text x="30" y="40" font-family="Inter" font-size="22" font-weight="800" fill="currentColor">Draufsicht (Spur)</text>
+
+          <!-- axis -->
+          <line x1="90" y1="170" x2="810" y2="170" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>
+          <text x="92" y="200" font-family="Inter" font-size="14" fill="currentColor" opacity="0.75">Fahrzeug-Längsachse</text>
+
+          <!-- Toe-in -->
+          <text x="80" y="90" font-family="Inter" font-size="16" font-weight="800" fill="currentColor">Positive Spur (Vorspur / toe-in)</text>
+          <rect x="120" y="120" width="90" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="3" transform="rotate(-10 165 138)"/>
+          <rect x="260" y="120" width="90" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="3" transform="rotate(10 305 138)"/>
+          <line x1="165" y1="138" x2="305" y2="138" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>
+
+          <!-- Toe-out -->
+          <text x="500" y="90" font-family="Inter" font-size="16" font-weight="800" fill="currentColor">Negative Spur (Nachspur / toe-out)</text>
+          <rect x="540" y="120" width="90" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="3" transform="rotate(10 585 138)"/>
+          <rect x="680" y="120" width="90" height="36" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="3" transform="rotate(-10 725 138)"/>
+          <line x1="585" y1="138" x2="725" y2="138" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>
+        </svg>
+
+        <div class="mt-4 lg-muted">
+          <span class="kbd">Tipp</span> Spur ist der schnellste Weg, Reifen zu ruinieren. Camber macht „Kante“, Toe macht „Schleifen/Feathering“.
+        </div>
+      </section>
+
+      <!-- Grundlagen -->
+      <section id="grundlagen" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">01. Grundlagen: Spurweite & Achsabstand</h2>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Definitionen (einfach)</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>Achsabstand</b> (Radstand): Abstand zwischen Vorder- und Hinterachse (gemessen in Fahrtrichtung).</li>
+              <li><b>Spurweite</b>: Abstand zwischen den <b>Mitten</b> der Reifenaufstandsflächen links/rechts einer Achse.</li>
+              <li><b>Mess-Bedingung</b>: Fahrzeug gerade, auf ebener Fläche. Bei Abmessungen meist „unbeladen“ (Ausnahmen je nach Fahrzeugklasse).</li>
+            </ul>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Mehrspurig vs. Doppelräder</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>„Doppelräder“ zählen als <b>ein Rad</b>, wenn der Abstand der Aufstandsmitten <b>≤ 460 mm</b> ist.</li>
+              <li>Eselsbrücke: <b>≤ 460 mm</b> = noch „wie ein Rad“ · <b>&gt; 460 mm</b> = klar mehrspurig.</li>
+              <li>Bei 3-Rädern (z.B. 2 vorne) entscheidet diese Track-Breite oft die Kategorie.</li>
+            </ul>
+            <p class="mini-note mt-2 lg-muted">Hinweis: genaue Einteilung hängt von Typ/Regelwerk ab.</p>
+          </div>
+        </div>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="tool" class="w-4 h-4"></i>Praxis: Was muss stimmen, bevor man misst?</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Reifendruck korrekt, gleiche Reifengrösse links/rechts.</li>
+              <li>Kein Spiel in Spurstangenköpfen, Traggelenken, Radlager, Querlenkerbuchsen.</li>
+              <li>Fahrzeughöhe korrekt (kein Federbruch, keine „Tieferlegung ohne Korrektur“).</li>
+              <li>Lenkrad gerade, Lenkung nicht verspannt (Räder kurz rollen lassen).</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <!-- Spur -->
+      <section id="spur" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">02. Spur (Toe)</h2>
+
+        <div class="grid md:grid-cols-3 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Was ist das?</h3>
+            <p class="lg-muted mt-2">
+              Spur = Winkel der Räder zur Fahrzeug-Längsachse (Draufsicht).
+              <b>Vorspur</b> stabilisiert meist geradeaus, <b>Nachspur</b> kann „agiler“ wirken.
+            </p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Warum stellt der Hersteller Spur ein?</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>Beim Fahren verformen sich Gummilager (Compliance).</li>
+              <li>Antriebskräfte ziehen/schieben an der Achse → Spur ändert sich unter Last.</li>
+              <li>Darum gibt es eine Soll-Spur, damit das Auto <b>unter Fahrt</b> stabil ist.</li>
+            </ul>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Reifenbild</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>Zu viel Toe = „Schleifen“ → <b>Feathering/Sägezahn</b>.</li>
+              <li>Innen/außen-Kante stark = eher Camber, nicht primär Toe.</li>
+              <li>Lenkrad schief = oft Spur vorn, aber Ursache kann hinten beginnen.</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="volume-2" class="w-4 h-4"></i>Situation: Pfeifen/Quietschen in der Tiefgarage</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <p><b>Sehr häufig:</b> Reifen quietschen, weil sie in engen Kurven „schrubben“ (zu viel Spur, falscher Ackermann, viel Sturz, breite Reifen, falscher Druck).</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Tieferlegung + viel Sturz = Kontaktfläche schmaler, rutscht leichter.</li>
+              <li>Zu viel Vorspur vorne oder hinten = Reifen schieben seitlich.</li>
+              <li>Positiver Lenkrollradius (z.B. Distanzscheiben) verstärkt Schrubben/Kickback.</li>
+              <li>Auch möglich: Schleifen am Radhaus oder Bremse schleift. Erst Sichtprüfung, dann messen.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="move" class="w-4 h-4"></i>Spurplatte: Wohin bewegt sie sich?</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <p>Die Spurplatte kann quer zur Fahrtrichtung verschieben. Das Rad „will“ in die Richtung rollen, in die es zeigt.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><b>Vorwärts:</b> Platte wandert zur Seite, in die das Rad zeigt.</li>
+              <li><b>Rückwärts:</b> Bewegung ist umgekehrt.</li>
+            </ul>
+            <p class="mini-note">In der Praxis misst man jede Seite separat. Links/rechts sauber notieren.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- Sturz -->
+      <section id="sturz" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">04. Sturz (Camber)</h2>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Warum negativ in der Kurve oft besser ist</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>In Kurven rollt die Karosserie. Das Außenrad „kippt“ Richtung positiv.</li>
+              <li>Startest du mit <b>negativem</b> Sturz, steht das Außenrad eher <b>gerade</b> → mehr Grip.</li>
+              <li>Sportlicher = mehr negativ (Innenkante leidet).</li>
+            </ul>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Warum positiver Sturz „Reifen schont“</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>In Geradeausfahrt ist die Aufstandsfläche gleichmässiger.</li>
+              <li>Zu viel negativ = <b>Innenkante</b> wird überlastet.</li>
+              <li>Zu viel positiv = <b>Aussenkante</b> überlastet (heute selten).</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="wind" class="w-4 h-4"></i>Sturz & Spurplatte (Cone-Effekt)</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <p>Ein schräg stehendes Rad wirkt wie ein <b>Kegel</b>. Ein Kegel rollt nicht gerade, sondern „zieht“ seitlich.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><b>Vorwärts:</b> negativ erzeugt seitliche Kraft nach innen, positiv nach außen.</li>
+              <li><b>Rückwärts:</b> Richtung kehrt sich um.</li>
+            </ul>
+            <p class="mini-note">Effekt kleiner als Toe, aber messbar.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- Spreizung -->
+      <section id="spreizung" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">05. Spreizung (SAI/KPI)</h2>
+
+        <div class="grid md:grid-cols-3 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Definition</h3>
+            <p class="lg-muted mt-2">
+              Spreizung = Neigung der <b>Lenkachse</b> zur Senkrechten (Frontansicht).
+              Meist konstruktiv vorgegeben (Federbein/Achsschenkel/Packaging).
+            </p>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Wofür?</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>Stabilität und Rückstellmoment.</li>
+              <li>Basis für Lenkrollradius-Design.</li>
+              <li>Platz für Bremse/Federbein/Felge.</li>
+            </ul>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Diagnose</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>Spreizung ist meist <b>nicht</b> einstellbar.</li>
+              <li>Abweichung = oft <b>verbogen</b> (Achsschenkel, Federbein, Träger).</li>
+              <li>Mit Sturz zusammen ergibt sie den <b>kombinierten Winkel</b>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <svg class="svg-diagram" viewBox="0 0 920 360" role="img" aria-label="Frontansicht: Spreizung und Lenkrollradius">
+          <text x="30" y="46" font-family="Inter" font-size="22" font-weight="800" fill="currentColor">Frontansicht: Lenkachse & Lenkrollradius</text>
+
+          <line x1="60" y1="300" x2="860" y2="300" stroke="currentColor" stroke-opacity="0.25" stroke-width="4"/>
+          <text x="60" y="330" font-family="Inter" font-size="14" fill="currentColor" opacity="0.75">Strasse</text>
+
+          <line x1="520" y1="90" x2="520" y2="300" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>
+          <text x="535" y="145" font-family="Inter" font-size="13" fill="currentColor" opacity="0.75">Radmitte</text>
+
+          <rect x="460" y="120" width="120" height="160" rx="22" fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="4"/>
+          <line x1="460" y1="200" x2="580" y2="200" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>
+
+          <line x1="410" y1="70" x2="470" y2="300" stroke="currentColor" stroke-opacity="0.65" stroke-width="4"/>
+          <circle cx="470" cy="300" r="6" fill="currentColor" opacity="0.8"/>
+          <text x="380" y="72" font-family="Inter" font-size="14" fill="currentColor" opacity="0.9">Lenkachse</text>
+
+          <line x1="470" y1="315" x2="520" y2="315" stroke="currentColor" stroke-opacity="0.8" stroke-width="4"/>
+          <polygon points="520,315 510,309 510,321" fill="currentColor" opacity="0.8"/>
+          <text x="480" y="345" font-family="Inter" font-size="14" fill="currentColor" opacity="0.9">R₀</text>
+
+          <text x="70" y="105" font-family="Inter" font-size="14" fill="currentColor" opacity="0.78">
+            R₀ = Abstand (Boden) zwischen Lenkachsen-Schnittpunkt und Reifenmitte
+          </text>
+        </svg>
+
+        <div class="mt-4 lg-muted">
+          <span class="kbd">Sign</span> Hier: <b>positiver</b> Lenkrollradius = Reifenmitte liegt <b>außen</b> vom Lenkachsen-Schnittpunkt.
+        </div>
+      </section>
+
+      <!-- Lenkrollradius -->
+      <section id="lenkrollradius" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">06. Lenkrollradius (Scrub Radius)</h2>
+
+        <div class="grid md:grid-cols-3 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Was ist das?</h3>
+            <p class="lg-muted mt-2">
+              Abstand am Boden zwischen Reifenaufstandsmitte und Punkt, wo die Lenkachse den Boden trifft.
+              Er bestimmt, wie stark Kräfte am Rad die Lenkung „mitnehmen“.
+            </p>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Positiv / 0 / Negativ</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>Positiv</b>: mehr Rückstell-/Lenkmoment, aber mehr Kickback, evtl. Torque-Steer.</li>
+              <li><b>0</b>: neutral, wenig Störungen.</li>
+              <li><b>Negativ</b>: oft ruhiger beim Bremsen auf Split-µ, weniger Kickback.</li>
+            </ul>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Was verändert ihn?</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>ET</b> / Distanzscheiben.</li>
+              <li>Spreizung (SAI) und Sturz.</li>
+              <li>Achsteile nach Unfall (Träger/Querlenker/Achsschenkel).</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="shield" class="w-4 h-4"></i>Bremsen & Sicherheit (Split-µ)</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <p>Bei unterschiedlichem Reibwert links/rechts (Eis/Asphalt) entstehen unterschiedliche Bremskräfte.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Ungünstiger Lenkrollradius erzeugt starkes Lenkmoment (Auto „zieht“).</li>
+              <li>Deshalb oft kleine oder negative Werte bei modernen Fahrzeugen.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <!-- Nachlauf -->
+      <section id="nachlauf" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">07. Nachlauf (Caster)</h2>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Definition</h3>
+            <p class="lg-muted mt-2">
+              Nachlaufwinkel = Neigung der Lenkachse zur Senkrechten in der <b>Seitenansicht</b>.
+              <b>Positiv</b>: oben ist die Lenkachse weiter hinten als unten.
+            </p>
+            <p class="lg-muted mt-2">Nachlaufstrecke = Abstand (am Boden) zwischen Radaufstand und Lenkachsen-Schnittpunkt (seitlich).</p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Wirkungen</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>Selbstzentrierung</b>: Lenkrad will zurück.</li>
+              <li><b>Stabilität</b>: ruhiger Geradeauslauf.</li>
+              <li><b>Lenkkraft</b>: mehr Nachlauf = schwerer.</li>
+              <li><b>Kurve</b>: Camber-Gewinn beim Einschlagen.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ackermann / Spurdifferenz -->
+      <section id="ackermann" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">03 / 08. Spurdifferenz & Spurdifferenzwinkel (Ackermann)</h2>
+
+        <div class="grid md:grid-cols-3 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Problem</h3>
+            <p class="lg-muted mt-2">Innenrad fährt kleineren Radius → muss stärker einschlagen.</p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Lösung</h3>
+            <p class="lg-muted mt-2">
+              Ackermann-Geometrie sorgt dafür, dass <b>Innenrad-Winkel α</b> größer ist als <b>Aussenrad-Winkel β</b>.
+            </p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Spurdifferenzwinkel δ</h3>
+            <p class="lg-muted mt-2">
+              δ = α − β. Abhängig von Radstand, Spurweite und Anlenkpunkten (Achsschenkel-Lenkhebel).
+            </p>
+          </div>
+        </div>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="help-circle" class="w-4 h-4"></i>Welches Bauteil „macht“ den Ackermann?</summary>
+          <div class="mt-3 lg-muted">
+            <p>Vor allem die <b>Achsschenkel-Lenkhebel</b> (Spurstangen-Anlenkpunkt) plus Lenkgetriebe/Spurstangen. Konstruktiv fix.</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- Kombinierter Winkel -->
+      <section id="kombiwinkel" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">09. Kombinierter Winkel (Included Angle)</h2>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Aus welchen Winkeln?</h3>
+            <p class="lg-muted mt-2">
+              Kombinierter Winkel = <b>Spreizung (SAI)</b> + <b>Sturz (Camber)</b> auf derselben Seite.
+              Diagnosewert: zeigt, ob die Geometrie „als Paket“ stimmt.
+            </p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Warum Diagnose?</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>Spreizung nicht einstellbar → Abweichung deutet auf Schaden.</li>
+              <li>Nach Unfall häufig: Achsschenkel, Federbein, Querlenker oder Achsträger verbogen.</li>
+              <li>Camber kann teilweise einstellbar sein, Kombiwinkel hilft Ursache finden.</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="activity" class="w-4 h-4"></i>Typische Defekte bei Abweichung</summary>
+          <div class="mt-3 lg-muted">
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Achsschenkel / Radträger krumm</li>
+              <li>Federbein (McPherson) verbogen</li>
+              <li>Querlenker / Traggelenk verbogen</li>
+              <li>Achsträger/Subframe verschoben</li>
+              <li>Felge/Reifen beschädigt (prüfen)</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <!-- Symmetrieachse & Achsversatz -->
+      <section id="achsversatz" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-8">
+        <h2 class="text-2xl font-extrabold">10. Symmetrieachse & Achsversatz</h2>
+
+        <div class="grid md:grid-cols-3 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Bezugsachse</h3>
+            <p class="lg-muted mt-2">
+              Linie, auf die das Messgerät alle Winkel bezieht.
+              Ohne saubere Bezugsachse misst du sehr präzise … <i>Murks</i>.
+            </p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Symmetrieachse</h3>
+            <p class="lg-muted mt-2">
+              Ideale Fahrzeugmitte. Wenn alles passt, sind Achsen symmetrisch dazu.
+            </p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Achsversatz / Radversatz</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li><b>Achsversatz</b>: Vorder- und Hinterachse seitlich gegeneinander verschoben.</li>
+              <li><b>Radversatz</b>: Räder einer Achse seitlich versetzt.</li>
+              <li>Folge: „Crabbing“, Lenkrad schief, Auto wirkt „schräg“.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Geometrische Fahrachse -->
+      <section id="fahrachse" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-10">
+        <h2 class="text-2xl font-extrabold">11. Geometrische Fahrachse</h2>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Was ist das?</h3>
+            <p class="lg-muted mt-2">
+              Geometrische Fahrachse (Thrust Line) = Richtung, die sich aus der Hinterachse ergibt.
+              Wenn hinten Toe nicht 0 ist, bestimmt <b>hinten</b> die Fahrtrichtung.
+            </p>
+          </div>
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold">Warum stellt man vorne auf hinten ein?</h3>
+            <ul class="mt-2 space-y-1 lg-muted">
+              <li>Wenn hinten schiebt, muss vorne „mitlaufen“, sonst lenkst du konstant dagegen.</li>
+              <li>Darum: erst Hinterachse korrekt, dann Vorderachse zur Fahrachse einstellen.</li>
+              <li>Symptom: Lenkrad schief, Auto „wandert“.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rechner -->
+      <section id="rechner" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-10">
+        <h2 class="text-2xl font-extrabold">Rechner</h2>
+        <p class="lg-muted mt-2">Tools für Aufgaben und „macht das Sinn?“-Checks.</p>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-5">
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold flex items-center gap-2"><i data-feather="move" class="w-4 h-4"></i>Spurplatte: Verschiebung</h3>
+            <p class="lg-muted mt-2">Input: Spurversatz <span class="mono">m/km</span> und Plattenlänge <span class="mono">m</span> → Output: <span class="mono">mm</span>.</p>
+
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <label class="lg-muted text-sm">Spurversatz (m/km)
+                <input id="sv_mkm" type="number" step="0.1" value="8"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+              <label class="lg-muted text-sm">Plattenlänge (m)
+                <input id="pl_m" type="number" step="0.1" value="1"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+            </div>
+
+            <div class="mt-3 liquid-glass lg-chip lg-radius-md p-3">
+              <div class="lg-muted text-sm">Verschiebung</div>
+              <div class="calc-out text-xl" id="sv_out">– mm</div>
+            </div>
+
+            <p class="mini-note mt-2 lg-muted">Formel: <span class="mono">mm = (m/km) × (Plattenlänge in m)</span></p>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold flex items-center gap-2"><i data-feather="refresh-cw" class="w-4 h-4"></i>Kreisverkehr: Umfänge & Umdrehungen</h3>
+            <p class="lg-muted mt-2">Standard: außen 25 m, innen 10.6 m (als Durchmesser). Reifen: 195/65R15.</p>
+
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <label class="lg-muted text-sm">D außen (m)
+                <input id="d_out" type="number" step="0.1" value="25"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+              <label class="lg-muted text-sm">D innen (m)
+                <input id="d_in" type="number" step="0.1" value="10.6"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+
+              <label class="lg-muted text-sm">Breite (mm)
+                <input id="tw" type="number" step="1" value="195"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+              <label class="lg-muted text-sm">Querschnitt (%)
+                <input id="ar" type="number" step="1" value="65"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+
+              <label class="lg-muted text-sm">Felge (Zoll)
+                <input id="rim" type="number" step="0.5" value="15"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+              <div class="flex items-end">
+                <button id="circle_reset" class="lg-btn w-full"><i data-feather="rotate-ccw" class="w-4 h-4"></i><span>Reset</span></button>
+              </div>
+            </div>
+
+            <div class="mt-3 liquid-glass lg-chip lg-radius-md p-3 space-y-1">
+              <div class="lg-muted text-sm">Resultat</div>
+              <div class="calc-out" id="circle_out">–</div>
+              <div class="mini-note lg-muted" id="circle_note">–</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold flex items-center gap-2"><i data-feather="sliders" class="w-4 h-4"></i>ET → Radverschiebung</h3>
+            <p class="lg-muted mt-2">ΔET verschiebt das Rad seitlich. Grob 1:1 Einfluss auf Scrub-Radius-Größenordnung.</p>
+
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <label class="lg-muted text-sm">ET alt (mm)
+                <input id="et_old" type="number" step="1" value="45"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+              <label class="lg-muted text-sm">ET neu (mm)
+                <input id="et_new" type="number" step="1" value="35"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+            </div>
+
+            <div class="mt-3 liquid-glass lg-chip lg-radius-md p-3">
+              <div class="lg-muted text-sm">Radverschiebung</div>
+              <div class="calc-out text-xl" id="et_out">–</div>
+              <div class="mini-note lg-muted mt-1">Positiv = Rad wandert <b>nach innen</b>. Negativ = <b>nach außen</b>.</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-card lg-radius-xl p-4">
+            <h3 class="font-extrabold flex items-center gap-2"><i data-feather="shuffle" class="w-4 h-4"></i>Toe: Grad → mm (pro Rad)</h3>
+            <p class="lg-muted mt-2">Viele Geräte zeigen Toe in Grad, manche in mm. Hier: am Felgendurchmesser.</p>
+
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <label class="lg-muted text-sm">Toe pro Rad (°)
+                <input id="toe_deg" type="number" step="0.01" value="0.10"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+              <label class="lg-muted text-sm">Felgendurchmesser (mm)
+                <input id="rim_d" type="number" step="1" value="381"
+                  class="w-full mt-1 bg-white/5 text-white border border-white/10 rounded-lg px-3 py-2 focus:outline-none">
+              </label>
+            </div>
+
+            <div class="mt-3 liquid-glass lg-chip lg-radius-md p-3">
+              <div class="lg-muted text-sm">Toe (mm) pro Rad</div>
+              <div class="calc-out text-xl" id="toe_out">– mm</div>
+              <div class="mini-note lg-muted mt-1">Formel: <span class="mono">mm = tan(°) × Durchmesser</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Aufgaben -->
+      <section id="aufgaben" class="liquid-glass lg-surface lg-radius-2xl p-6 mb-24">
+        <h2 class="text-2xl font-extrabold">Aufgaben & Lösungen (ausklappbar)</h2>
+        <p class="lg-muted mt-2">Zum Lernen: erst selbst probieren, dann aufklappen. Du bist nicht aus Zucker.</p>
+
+        <details class="lg-details mt-5">
+          <summary><i data-feather="file-text" class="w-4 h-4"></i>01 · a–d Spurweite & Achsabstand</summary>
+          <div class="mt-3 lg-muted space-y-3">
+            <div>
+              <b>a) Abmessungen (Definitionen)</b>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>Spurweite = Abstand der Mitten der Reifenaufstandsflächen links/rechts einer Achse.</li>
+                <li>Achsabstand (Radstand) = Abstand zwischen Vorder- und Hinterachse.</li>
+                <li>Messung typischerweise am unbeladenen Fahrzeug (je nach Vorgabe).</li>
+              </ul>
+            </div>
+            <div><b>b)</b> Draufsicht zeichnen: Radstand (vorn–hinten), Spurweite (links–rechts pro Achse).</div>
+            <div>
+              <b>c)</b> Bedingungen:
+              <ul class="list-disc pl-5 space-y-1">
+                <li>Ebene Fläche, Räder gerade, korrekter Reifendruck.</li>
+                <li>Gleiche Dimension links/rechts, keine groben Schäden/Spiel.</li>
+              </ul>
+            </div>
+            <div><b>d)</b> Doppelräder zählen als ein Rad bei Abstand der Aufstandsmitten <b>≤ 460 mm</b>.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="corner-up-left" class="w-4 h-4"></i>02 · Spur: a–f</summary>
+          <div class="mt-3 lg-muted space-y-3">
+            <div><b>a)</b> Vorspur/positiv = vorne zusammen, Nachspur/negativ = vorne auseinander (Draufsicht, Bezugsachse = Fahrzeug-Längsachse).</div>
+            <div><b>b)</b> Spur je Achse unterschiedlich wegen Compliance, Antriebskräften und Fahrstabilität (Hersteller-Sollwerte).</div>
+            <div><b>c)</b> Zu viel Toe = Sägezahn/Feathering + schneller Abrieb.</div>
+            <div><b>d)</b> Spurplatte vorwärts: Bewegung zur Seite, in die das Rad zeigt.</div>
+            <div><b>e)</b> Spurplatte rückwärts: umgekehrt.</div>
+            <div><b>f)</b> 1 m Platte, 8 m/km ⇒ 8/1000 m pro m ⇒ 0.008 m ⇒ <b>8 mm</b>.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="repeat" class="w-4 h-4"></i>03 · Spurdifferenz: a–c</summary>
+          <div class="mt-3 lg-muted space-y-3">
+            <div>
+              <b>a)</b> U außen = π·25 ≈ <b>78.54 m</b> · U innen = π·10.6 ≈ <b>33.30 m</b>
+            </div>
+            <div>
+              <b>b)</b> Reifen 195/65R15: D ≈ 0.6345 m · U ≈ 1.99 m → n außen ≈ 39.4 · n innen ≈ 16.7
+            </div>
+            <div><b>c)</b> Ackermann kommt von Achsschenkel-Lenkhebeln + Spurstangenanlenkung.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="align-center" class="w-4 h-4"></i>04 · Sturz: a–d</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <div><b>a)</b> Positiv = oben außen, negativ = oben innen.</div>
+            <div><b>b)</b> Negativ hilft in Kurve (Rollbewegung kompensieren).</div>
+            <div><b>c)</b> Zu viel negativ = Innenkante leidet.</div>
+            <div><b>d)</b> Kegel-Effekt: Vorwärts negativ zieht nach innen, rückwärts umgekehrt.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="compass" class="w-4 h-4"></i>05/06 · Spreizung & Lenkrollradius: a–f</summary>
+          <div class="mt-3 lg-muted space-y-3">
+            <div>
+              <b>a–c)</b> R₀ positiv/0/negativ zeichnen (Sturz=0):
+              <ul class="list-disc pl-5 space-y-1">
+                <li>positiv: Reifenmitte außen</li>
+                <li>0: deckungsgleich</li>
+                <li>negativ: Reifenmitte innen</li>
+              </ul>
+            </div>
+            <div><b>d)</b> Sturz verschiebt Aufstandsmitte leicht → R₀ ändert.</div>
+            <div><b>e)</b> Größere ET = Rad nach innen → R₀ kleiner/negativer. Kleinere ET/Spurplatten = Rad nach außen → R₀ positiver.</div>
+            <div><b>f)</b> Spreizung: Stabilität, Rückstellmoment, Kickback reduzieren, Packaging, R₀ gestalten.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="trending-up" class="w-4 h-4"></i>07 · Nachlauf: a–b</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <div><b>a)</b> Nachlauf = Lenkachse in Seitenansicht geneigt. Positiv: oben hinten.</div>
+            <div><b>b)</b> Wirkung: Selbstzentrierung, Stabilität, mehr Lenkkraft, Camber-Gewinn beim Lenken.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="layers" class="w-4 h-4"></i>09 · Kombinierter Winkel</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <div>Kombi = <b>Spreizung + Sturz</b> (gleiche Seite). Abweichung nach Unfall: häufig Achsschenkel/Federbein/Querlenker/Träger verbogen.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="target" class="w-4 h-4"></i>10 · Bezugsachse & Achsversatz</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <div><b>Bezugsachse</b> = Referenzlinie für alle Messwerte.</div>
+            <div><b>Wichtig</b>, sonst sind Messwerte „schön“, aber Auto fährt schief.</div>
+            <div><b>Achsversatz</b> = Achsen seitlich gegeneinander verschoben → Crabbing + Lenkrad schief.</div>
+          </div>
+        </details>
+
+        <details class="lg-details mt-4">
+          <summary><i data-feather="navigation-2" class="w-4 h-4"></i>11 · Geometrische Fahrachse</summary>
+          <div class="mt-3 lg-muted space-y-2">
+            <div><b>a)</b> Fahrzeug folgt meist der Hinterachse/Thrust Line.</div>
+            <div><b>b)</b> In Fahrt gegenlenken. In Werkstatt: erst hinten korrekt, dann vorne zur Fahrachse einstellen.</div>
+          </div>
+        </details>
+      </section>
+
+      <footer class="liquid-glass lg-surface lg-radius-2xl p-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div class="font-extrabold text-lg">LenkgeometriePRO</div>
+            <div class="lg-muted text-sm">Für Lernende · Winkel verstehen · Fehler finden · Reifen retten</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="liquid-glass lg-chip lg-radius-pill px-3 py-1 font-semibold">Version 1.0</span>
+            <span class="liquid-glass lg-chip lg-radius-pill px-3 py-1 font-semibold">Offline-Ready*</span>
+          </div>
+        </div>
+        <p class="mini-note lg-muted mt-3">* Wetter-Widget braucht Internet. Alles andere läuft lokal.</p>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Bottom Bar -->
+  <nav id="bottomBar" class="liquid-glass bottom-bar lg-radius-pill" aria-label="Navigation">
+    <a class="bar-item active" href="Index.html" aria-label="Home">
+      <i data-feather="home" class="bar-icon"></i>
+      <span class="bar-label">Home</span>
+    </a>
+
+    <a class="bar-item" href="#overview" data-target="overview" aria-label="Übersicht">
+      <i data-feather="grid" class="bar-icon"></i>
+      <span class="bar-label">Übersicht</span>
+    </a>
+
+    <a class="bar-item" href="#rechner" data-target="rechner" aria-label="Rechner">
+      <i data-feather="cpu" class="bar-icon"></i>
+      <span class="bar-label">Rechner</span>
+    </a>
+
+    <a class="bar-item" href="#aufgaben" data-target="aufgaben" aria-label="Aufgaben">
+      <i data-feather="check-square" class="bar-icon"></i>
+      <span class="bar-label">Aufgaben</span>
+    </a>
+
+    <button id="themeToggle" class="bar-item" type="button" aria-label="Theme wechseln">
+      <i id="themeIcon" data-feather="sun" class="bar-icon"></i>
+      <span class="bar-label">Theme</span>
+    </button>
+  </nav>
+
+  <div id="scrollProgress"></div>
+
+  <script>
+    // Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.feather) feather.replace();
+    });
+
+    // Theme
+    (function themeInit(){
+      const html = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      function applyTheme(mode){
+        html.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+        if (icon) icon.setAttribute('data-feather', mode === 'dark' ? 'sun' : 'moon');
+        if (window.feather) feather.replace();
+      }
+
+      applyTheme(localStorage.getItem('theme') || 'dark');
+
+      btn?.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+
+    // Date/Time
+    function updateDateTime() {
+      const now = new Date();
+      const d = document.getElementById('date');
+      const t = document.getElementById('time');
+      if (d) d.textContent = now.toLocaleDateString('de-CH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      if (t) t.textContent = now.toLocaleTimeString('de-CH');
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Weather (simple)
+    async function fetchWeather(){
+      try{
+        const res = await fetch('https://wttr.in/Bern?format=%25C|%25t', {cache:'no-store'});
+        const text = await res.text();
+        const [c,temp] = (text||'').split('|');
+        const wxT = document.getElementById('wxText');
+        const wxTemp = document.getElementById('wxTemp');
+        if (wxT) wxT.textContent = c || '–';
+        if (wxTemp) wxTemp.textContent = (temp||'–').replace('+','');
+      }catch(e){}
+    }
+    fetchWeather();
+
+    // Search: filter overview cards
+    const searchInput = document.getElementById('q');
+    const grid = document.getElementById('grid');
+    const emptyState = document.getElementById('empty');
+    const cards = grid ? [...grid.querySelectorAll('article[data-id]')] : [];
+
+    function normalize(text) {
+      return (text || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function performSearch() {
+      const q = normalize((searchInput?.value || '').trim());
+      let has = false;
+
+      cards.forEach(card => {
+        const text = normalize(card.innerText);
+        const ok = !q || text.includes(q);
+        card.style.display = ok ? 'flex' : 'none';
+        if (ok) has = true;
+      });
+
+      if (emptyState) emptyState.style.display = has ? 'none' : 'block';
+    }
+    searchInput?.addEventListener('input', performSearch);
+
+    // View toggle: Cards vs. List
+    const viewCardsBtn = document.getElementById('viewCards');
+    const viewListBtn = document.getElementById('viewList');
+
+    function setView(isList){
+      if (!grid) return;
+      grid.classList.toggle('grid-cols-1', isList);
+      grid.classList.toggle('sm:grid-cols-2', !isList);
+      grid.classList.toggle('lg:grid-cols-3', !isList);
+      grid.classList.toggle('gap-1', isList);
+      grid.classList.toggle('gap-4', !isList);
+      cards.forEach(c => c.classList.toggle('lg-list', isList));
+      viewCardsBtn?.setAttribute('aria-pressed', String(!isList));
+      viewListBtn?.setAttribute('aria-pressed', String(isList));
+    }
+    viewCardsBtn?.addEventListener('click', () => setView(false));
+    viewListBtn?.addEventListener('click', () => setView(true));
+
+    // Bottom bar active state
+    (function barActive(){
+      const items = Array.from(document.querySelectorAll('#bottomBar .bar-item[href^="#"]'));
+      const sectionIds = ['overview','spicker','grundlagen','spur','sturz','spreizung','lenkrollradius','nachlauf','ackermann','kombiwinkel','achsversatz','fahrachse','rechner','aufgaben'];
+      const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+
+      function setActive(id){
+        items.forEach(a => a.classList.toggle('active', a.dataset.target === id));
+      }
+
+      const obs = new IntersectionObserver((entries)=>{
+        const v = entries.filter(e => e.isIntersecting).sort((a,b)=> b.intersectionRatio - a.intersectionRatio)[0];
+        if (v?.target?.id) setActive(v.target.id);
+      }, { rootMargin: '-40% 0px -55% 0px', threshold: [0.08, 0.15, 0.25] });
+
+      sections.forEach(s => obs.observe(s));
+    })();
+
+    // Scroll progress
+    (function(){
+      const progress = document.getElementById('scrollProgress');
+      const onScroll = () => {
+        const h = document.documentElement;
+        const denom = (h.scrollHeight - h.clientHeight) || 1;
+        progress.style.width = (h.scrollTop / denom * 100).toFixed(2) + '%';
+      };
+      document.addEventListener('scroll', onScroll, {passive:true});
+      onScroll();
+    })();
+
+    // ===== Rechner-Funktionen =====
+    function rad(d){ return d * Math.PI / 180; }
+
+    // Spurplatte
+    const sv_mkm = document.getElementById('sv_mkm');
+    const pl_m = document.getElementById('pl_m');
+    const sv_out = document.getElementById('sv_out');
+    function calcSpurplatte(){
+      const mkm = Number(sv_mkm?.value) || 0;
+      const L = Number(pl_m?.value) || 0;
+      const mm = mkm * L;
+      if (sv_out) sv_out.textContent = mm.toFixed(2) + ' mm';
+    }
+    [sv_mkm, pl_m].forEach(el => el?.addEventListener('input', calcSpurplatte));
+    calcSpurplatte();
+
+    // Kreisverkehr
+    const d_out = document.getElementById('d_out');
+    const d_in = document.getElementById('d_in');
+    const tw = document.getElementById('tw');
+    const ar = document.getElementById('ar');
+    const rim = document.getElementById('rim');
+    const circle_out = document.getElementById('circle_out');
+    const circle_note = document.getElementById('circle_note');
+    const circle_reset = document.getElementById('circle_reset');
+
+    function tireCirc(width_mm, aspect_pct, rim_in){
+      const side = width_mm * (aspect_pct/100);
+      const rim_mm = rim_in * 25.4;
+      const D = rim_mm + 2*side; // mm
+      const U = Math.PI * (D/1000); // m
+      return {D_m: D/1000, U_m: U};
+    }
+
+    function calcCircle(){
+      const Do = Number(d_out?.value) || 0;
+      const Di = Number(d_in?.value) || 0;
+      const Uo = Math.PI * Do;
+      const Ui = Math.PI * Di;
+
+      const t = tireCirc(Number(tw?.value)||0, Number(ar?.value)||0, Number(rim?.value)||0);
+      const nO = t.U_m ? (Uo / t.U_m) : 0;
+      const nI = t.U_m ? (Ui / t.U_m) : 0;
+
+      if (circle_out){
+        circle_out.innerHTML =
+          `U außen = <b>${Uo.toFixed(2)} m</b> · U innen = <b>${Ui.toFixed(2)} m</b><br>`+
+          `Reifen U ≈ <b>${t.U_m.toFixed(3)} m</b> (D ≈ ${t.D_m.toFixed(4)} m)<br>`+
+          `Umdrehungen: außen ≈ <b>${nO.toFixed(2)}</b> · innen ≈ <b>${nI.toFixed(2)}</b>`;
+      }
+      if (circle_note){
+        circle_note.textContent = 'Hinweis: reale Abrollumfänge sind unter Last etwas kleiner (dynamischer Radius).';
+      }
+    }
+    [d_out,d_in,tw,ar,rim].forEach(el => el?.addEventListener('input', calcCircle));
+    circle_reset?.addEventListener('click', ()=>{
+      d_out.value = 25; d_in.value = 10.6; tw.value = 195; ar.value = 65; rim.value = 15;
+      calcCircle();
+    });
+    calcCircle();
+
+    // ET
+    const et_old = document.getElementById('et_old');
+    const et_new = document.getElementById('et_new');
+    const et_out = document.getElementById('et_out');
+    function calcET(){
+      const oldV = Number(et_old?.value)||0;
+      const newV = Number(et_new?.value)||0;
+      const shift = newV - oldV; // + = innen
+      const dir = shift > 0 ? 'nach innen' : (shift < 0 ? 'nach außen' : 'keine');
+      if (et_out){
+        et_out.innerHTML = `<b>${shift.toFixed(1)} mm</b> (${dir}) · grob: ΔLenkrollradius ≈ ${(-shift).toFixed(1)} mm`;
+      }
+    }
+    [et_old, et_new].forEach(el => el?.addEventListener('input', calcET));
+    calcET();
+
+    // Toe deg -> mm
+    const toe_deg = document.getElementById('toe_deg');
+    const rim_d = document.getElementById('rim_d');
+    const toe_out = document.getElementById('toe_out');
+    function calcToe(){
+      const deg = Number(toe_deg?.value)||0;
+      const D = Number(rim_d?.value)||0;
+      const mm = Math.tan(rad(deg)) * D;
+      if (toe_out) toe_out.textContent = mm.toFixed(2) + ' mm';
+    }
+    [toe_deg, rim_d].forEach(el => el?.addEventListener('input', calcToe));
+    calcToe();
+  </script>
+</body>
+</html>

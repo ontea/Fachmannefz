@@ -1,0 +1,2707 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>LearnCraft Pro</title>
+  <meta name="description" content="Lernkarten & Tools für Automobilfachleute (1.–2. Lehrjahr). Liquid-Glass UI, Offline-Suche, Stats, Verlauf & Quiz.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <style>
+    /* ===== Light-Mode Lesbarkeit ===== */
+    [data-theme="light"] body { color: rgba(15,23,42,0.92); }
+    [data-theme="light"] .liquid-glass{
+      background: rgba(255,255,255,0.70) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.10) !important;
+      color: rgba(15,23,42,0.92) !important;
+    }
+    [data-theme="light"] .text-white{ color: rgba(15,23,42,0.92) !important; }
+    [data-theme="light"] .text-white\/90{ color: rgba(15,23,42,0.90) !important; }
+    [data-theme="light"] .text-white\/85{ color: rgba(15,23,42,0.85) !important; }
+    [data-theme="light"] .text-white\/80{ color: rgba(15,23,42,0.80) !important; }
+    [data-theme="light"] .text-white\/75{ color: rgba(15,23,42,0.78) !important; }
+    [data-theme="light"] .text-white\/70{ color: rgba(15,23,42,0.70) !important; }
+    [data-theme="light"] .text-white\/60{ color: rgba(15,23,42,0.60) !important; }
+
+    [data-theme="light"] .bg-white\/5{ background: rgba(2,6,23,0.04) !important; }
+    [data-theme="light"] .bg-white\/10{ background: rgba(2,6,23,0.07) !important; }
+    [data-theme="light"] .border-white\/10{ border-color: rgba(15,23,42,0.14) !important; }
+    [data-theme="light"] .border-white\/15{ border-color: rgba(15,23,42,0.18) !important; }
+    [data-theme="light"] .focus\:border-white\/20:focus{ border-color: rgba(15,23,42,0.22) !important; }
+    [data-theme="light"] .focus\:ring-white\/10:focus{ --tw-ring-color: rgba(2,6,23,0.10) !important; }
+
+    [data-theme="light"] .lg-badge,
+    [data-theme="light"] .lg-chip{
+      background: rgba(2,6,23,0.06) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      color: rgba(15,23,42,0.78) !important;
+    }
+
+    .hidden{ display:none !important; }
+    .scroll-mt-24 { scroll-margin-top: 7rem; }
+
+    .svg-filters{ position:absolute; width:0; height:0; }
+
+    #scrollProgress{
+      position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+      background: rgba(56,189,248,.85);
+      z-index: 99999;
+    }
+
+
+    /* ===== Brand Logo (interactive) ===== */
+    .brand-logo{
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      transition: transform .18s ease;
+    }
+    .brand-logo::before{
+      content:"";
+      position:absolute;
+      inset:-60%;
+      background: conic-gradient(from 180deg, rgba(56,189,248,.45), rgba(168,85,247,.40), rgba(236,72,153,.32), rgba(56,189,248,.45));
+      opacity: .14;
+      filter: blur(12px);
+      animation: lcSpin 7s linear infinite;
+      z-index:0;
+    }
+    .brand-logo svg, .brand-logo img{ position: relative; z-index: 1; }
+    .brand-logo:hover{ transform: translateY(-1px) scale(1.02); }
+    .brand-logo:hover::before{ opacity: .22; }
+    @keyframes lcSpin{ to{ transform: rotate(360deg); } }
+    /* ===== Grundlook ===== */
+    :root{
+      --glass: rgba(255,255,255,0.08);
+      --glassB: rgba(255,255,255,0.12);
+      --blur: blur(22px);
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    body.app{
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: rgba(255,255,255,0.88);
+      background:
+        radial-gradient(900px 520px at 18% 18%, rgba(56,189,248,0.18) 0%, transparent 55%),
+        radial-gradient(900px 560px at 85% 82%, rgba(168,85,247,0.14) 0%, transparent 60%),
+        radial-gradient(900px 520px at 40% 110%, rgba(236,72,153,0.10) 0%, transparent 60%),
+        linear-gradient(135deg, #060812, #0b1226 40%, #050914);
+      overflow-x: hidden;
+    }
+    .page-wrap{ min-height: 100vh; padding-bottom: 120px; }
+
+    .liquid-glass{
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+    }
+    [data-theme="light"] .liquid-glass{
+      backdrop-filter: blur(22px) saturate(140%);
+      -webkit-backdrop-filter: blur(22px) saturate(140%);
+    }
+    .lg-surface{ overflow:hidden; }
+    .lg-radius-xl{ border-radius: 26px; }
+    .lg-radius-lg{ border-radius: 22px; }
+    .lg-radius-md{ border-radius: 16px; }
+    .lg-radius-pill{ border-radius: 999px; }
+
+    .lg-muted{ font-size: 12px; opacity: .7; }
+    .lg-divider{ width:1px; height: 28px; background: rgba(255,255,255,0.14); margin: 0 2px; }
+    [data-theme="light"] .lg-divider{ background: rgba(2,6,23,0.12); }
+
+    .lg-chip{
+      overflow:hidden;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+    }
+
+    .lg-btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.88);
+      cursor:pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+      text-decoration:none;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .lg-btn:hover{ transform: translateY(-2px); background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.20); }
+    [data-theme="light"] .lg-btn{ color: rgba(15,23,42,0.90); background: rgba(255,255,255,0.60); border-color: rgba(15,23,42,0.12); }
+
+    .lg-card{
+      overflow:hidden;
+      transition: transform .28s cubic-bezier(.2,1,.2,1), box-shadow .28s ease;
+    }
+    .lg-card:hover{ transform: translateY(-10px); box-shadow: 0 24px 78px rgba(0,0,0,0.55); }
+
+    .lg-open{
+      display:flex; align-items:center; justify-content:center; gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      text-decoration:none;
+      font-weight: 900;
+      color: #0b1024;
+      background: linear-gradient(90deg, rgba(255,255,255,0.92), rgba(255,255,255,0.55));
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: transform .18s ease, filter .18s ease;
+    }
+    .lg-open:hover{ transform: translateY(-2px); filter: brightness(1.06); }
+
+    /* Badge (für Karten) */
+    .lg-badge{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.86);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    [data-theme="light"] .lg-badge{
+      background: rgba(255,255,255,0.78);
+      border-color: rgba(15,23,42,0.12);
+      color: rgba(15,23,42,0.78);
+    }
+
+    /* ===== HERO (Landing) ===== */
+    #hero{ --p: 0; }
+    .hero-wrap{
+      position: relative;
+      min-height: 100svh;
+      overflow: hidden;
+      padding-bottom: 5.5rem;
+    }
+    .hero-bg{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+    .hero-bg .bubble{
+      position:absolute; border-radius: 9999px;
+      filter: blur(42px);
+      opacity: .55;
+      transform: translateZ(0);
+      animation: floaty 10s ease-in-out infinite;
+    }
+    .hero-bg .b1{ width: 520px; height: 520px; left:-180px; top:-160px;
+      background: radial-gradient(circle at 30% 30%, rgba(56,189,248,.45), rgba(56,189,248,0));
+      animation-duration: 11s;
+    }
+    .hero-bg .b2{ width: 560px; height: 560px; right:-220px; top:-220px;
+      background: radial-gradient(circle at 30% 30%, rgba(168,85,247,.38), rgba(168,85,247,0));
+      animation-duration: 12s;
+    }
+    .hero-bg .b3{ width: 640px; height: 640px; left:10%; bottom:-320px;
+      background: radial-gradient(circle at 30% 30%, rgba(236,72,153,.28), rgba(236,72,153,0));
+      animation-duration: 13s;
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0px) scale(1); }
+      50%{ transform: translateY(-18px) scale(1.03); }
+    }
+
+    .hero-shell{ position: relative; z-index: 2; }
+    .hero-fade{
+      opacity: calc(1 - (var(--p) * 0.95));
+      transform: translateY(calc(var(--p) * -32px));
+      filter: blur(calc(var(--p) * 1.8px));
+      will-change: transform, opacity, filter;
+    }
+    .hero-card-fade{
+      opacity: calc(1 - (var(--p) * 0.75));
+      transform: translateY(calc(var(--p) * 14px));
+      will-change: transform, opacity;
+    }
+    .hero-surface{
+      background: radial-gradient(120% 120% at 10% 10%, rgba(56,189,248,0.16) 0%, rgba(168,85,247,0.12) 45%, rgba(236,72,153,0.10) 100%);
+    }
+    .hero-enter{ animation: heroEnter .65s cubic-bezier(.2,.9,.2,1) both; }
+    .hero-enter-2{ animation: heroEnter .75s cubic-bezier(.2,.9,.2,1) both; animation-delay: .06s; }
+    .hero-enter-3{ animation: heroEnter .85s cubic-bezier(.2,.9,.2,1) both; animation-delay: .12s; }
+    @keyframes heroEnter{
+      from{ opacity:0; transform: translateY(14px) scale(.985); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+    .hero-scroll{
+      opacity: calc(1 - (var(--p) * 2));
+      transform: translateY(calc(var(--p) * 10px));
+      transition: opacity .1s linear;
+    }
+
+    /* ===== “Lappt drüber” Effekt ===== */
+    .content-wrap{ position: relative; z-index: 5; margin-top: -92px; padding-bottom: 90px; }
+
+    /* ===== Stats UI ===== */
+    .mini-divider{ height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
+    [data-theme="light"] .mini-divider{ background: rgba(2,6,23,0.10); }
+
+    .chip-row{ display:flex; flex-wrap: wrap; gap:.5rem; }
+    .chip{
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.45rem .65rem; border-radius:9999px;
+      font-size:12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.78);
+      transition: transform .12s ease, background .12s ease;
+      user-select: none;
+      cursor:pointer;
+    }
+    .chip:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.09); }
+    [data-theme="light"] .chip{ background: rgba(2,6,23,0.05); border-color: rgba(15,23,42,0.10); color: rgba(15,23,42,0.78); }
+
+    .heatmap{
+      display:grid;
+      grid-template-columns: repeat(14, minmax(0,1fr));
+      gap: 6px;
+    }
+    .hm-cell{
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      position: relative;
+    }
+    [data-theme="light"] .hm-cell{ border-color: rgba(15,23,42,0.12); background: rgba(2,6,23,0.05); }
+    .hm-cell[data-lvl="0"]{ opacity: .35; }
+    .hm-cell[data-lvl="1"]{ opacity: .60; }
+    .hm-cell[data-lvl="2"]{ opacity: .80; }
+    .hm-cell[data-lvl="3"]{ opacity: 1; }
+    .hm-cell::after{
+      content: attr(data-tip);
+      position:absolute; left:50%; bottom: 115%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: rgba(255,255,255,0.85);
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 6px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s ease;
+      z-index: 10;
+    }
+    [data-theme="light"] .hm-cell::after{
+      color: rgba(15,23,42,0.92);
+      background: rgba(255,255,255,0.82);
+      border-color: rgba(15,23,42,0.14);
+    }
+    .hm-cell:hover::after{ opacity: 1; }
+
+    .stats-tabs{ display:flex; gap:.5rem; flex-wrap: wrap; }
+    .tab-btn{
+      padding:.5rem .75rem; border-radius: 9999px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.75);
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab-btn[aria-selected="true"]{
+      color: rgba(255,255,255,0.90);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.16);
+    }
+    [data-theme="light"] .tab-btn{ background: rgba(2,6,23,0.05); border-color: rgba(15,23,42,0.12); color: rgba(15,23,42,0.78); }
+    [data-theme="light"] .tab-btn[aria-selected="true"]{ background: rgba(2,6,23,0.08); border-color: rgba(15,23,42,0.16); color: rgba(15,23,42,0.92); }
+
+    .kpi{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:.75rem;
+    }
+    .kpi .v{ font-weight:900; font-size: 22px; line-height: 1; }
+    .kpi .l{ font-size: 12px; opacity: .75; }
+    .kpi .r{ text-align:right; }
+    .bar{
+      height: 8px; border-radius:9999px; background: rgba(255,255,255,0.10);
+      overflow:hidden;
+    }
+    .bar > div{ height:100%; width: 0%; border-radius:9999px; background: rgba(255,255,255,0.72); }
+    [data-theme="light"] .bar{ background: rgba(2,6,23,0.10); }
+    [data-theme="light"] .bar > div{ background: rgba(2,6,23,0.55); }
+
+    .modal-backdrop{
+      position: fixed; inset: 0; z-index: 9999;
+      display:flex; align-items:center; justify-content:center;
+      padding: 16px;
+      background: rgba(0,0,0,0.55);
+    }
+    [data-theme="light"] .modal-backdrop{ background: rgba(2,6,23,0.35); }
+    .modal{
+      width: min(980px, 100%);
+      max-height: 86vh;
+      overflow:auto;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    [data-theme="light"] .modal{
+      background: rgba(255,255,255,0.82);
+      border-color: rgba(15,23,42,0.14);
+      box-shadow: 0 20px 60px rgba(2,6,23,0.25);
+    }
+    .table{ width:100%; border-collapse: collapse; }
+    .table th, .table td{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+      vertical-align: top;
+    }
+    [data-theme="light"] .table th, [data-theme="light"] .table td{ border-bottom-color: rgba(15,23,42,0.10); }
+    .table th{ text-align:left; color: rgba(255,255,255,0.70); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    [data-theme="light"] .table th{ color: rgba(15,23,42,0.60); }
+
+    .icon-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      width: 36px; height: 36px; border-radius: 9999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      cursor:pointer;
+      user-select:none;
+    }
+    .icon-btn:hover{ background: rgba(255,255,255,0.10); }
+    [data-theme="light"] .icon-btn{ background: rgba(2,6,23,0.05); border-color: rgba(15,23,42,0.12); }
+    [data-theme="light"] .icon-btn:hover{ background: rgba(2,6,23,0.08); }
+
+    .fav-on{ outline: 2px solid rgba(56,189,248,0.35); }
+    .mono{ font-variant-numeric: tabular-nums; }
+
+    /* ===== Bottom Bar (Dock) ===== */
+    #bottomBar{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      width: min(980px, calc(100% - 24px));
+      display:flex;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 26px;
+
+      /* mehr “Liquid-Glass” */
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(28px) saturate(175%);
+      -webkit-backdrop-filter: blur(28px) saturate(175%);
+      box-shadow: 0 18px 58px rgba(0,0,0,0.48);
+      overflow:hidden;
+      isolation:isolate;
+      z-index: 9999;
+    }
+    #bottomBar > *{ position: relative; z-index: 1; }
+    #bottomBar::before{
+      content:'';
+      position:absolute; inset:0;
+      background:
+        linear-gradient(135deg,
+          rgba(255,255,255,0.18) 0%,
+          rgba(255,255,255,0.06) 35%,
+          rgba(255,255,255,0.02) 70%,
+          rgba(255,255,255,0.01) 100%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.014) 0px,
+          rgba(255,255,255,0.014) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      opacity: .92;
+      pointer-events:none;
+      z-index: 0;
+    }
+    #bottomBar::after{
+      content:'';
+      position:absolute; inset:0;
+      z-index: -1;
+      border-radius: inherit;
+      /* Distortion-Filter (subtil) */
+      filter: url(#glass-distortion);
+      -webkit-filter: url(#glass-distortion);
+      pointer-events:none;
+      opacity: .95;
+    }
+    [data-theme="light"] #bottomBar{
+      background: rgba(255,255,255,0.72);
+      border-color: rgba(15,23,42,0.14);
+      box-shadow: 0 18px 50px rgba(2,6,23,0.18);
+    }
+    [data-theme="light"] #bottomBar::before{
+      background:
+        linear-gradient(135deg,
+          rgba(255,255,255,0.65) 0%,
+          rgba(255,255,255,0.30) 55%,
+          rgba(255,255,255,0.10) 100%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(2,6,23,0.01) 0px,
+          rgba(2,6,23,0.01) 1px,
+          transparent 2px,
+          transparent 4px
+        );
+      opacity: .95;
+    }
+
+    .bar-item{
+      flex: 1;
+      display:flex;
+      flex-direction: column;
+      align-items:center;
+      justify-content:center;
+      gap: 4px;
+      padding: 8px 6px;
+      border-radius: 18px;
+      background: transparent;
+      border: 0;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      user-select:none;
+      font-weight: 900;
+      font-size: 11px;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
+      text-decoration: none;
+    }
+    .bar-item:hover{ background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); transform: translateY(-1px); }
+    .bar-item.active{ background: rgba(56,189,248,0.10); color: rgba(255,255,255,0.92); }
+    .bar-item svg{ width: 18px; height: 18px; }
+    .bar-item div{ line-height: 1; }
+    [data-theme="light"] .bar-item{ color: rgba(15,23,42,0.60); }
+    [data-theme="light"] .bar-item:hover{ background: rgba(2,6,23,0.06); color: rgba(15,23,42,0.88); }
+    [data-theme="light"] .bar-item.active{ background: rgba(2,6,23,0.08); color: rgba(15,23,42,0.92); }
+
+    @media (max-width: 520px){
+      #bottomBar{ gap: 4px; padding: 10px; }
+      .bar-item{ font-size: 10px; padding: 8px 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .hero-enter, .hero-enter-2, .hero-enter-3{ animation: none !important; }
+      .hero-bg .bubble{ animation: none !important; }
+      .hero-fade, .hero-card-fade, .hero-scroll{ transform:none !important; filter:none !important; }
+      .lg-card:hover{ transform:none !important; }
+      .lg-btn:hover{ transform:none !important; }
+      .bar-item:hover{ transform:none !important; }
+    }
+  </style>
+</head>
+
+<body class="app">
+  <!-- SVG Filter: Liquid-Glass Distortion (für Dock/Glas-Effekt) -->
+  <svg class="svg-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="glass-distortion">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div id="scrollProgress"></div>
+
+  <main class="page-wrap">
+    <!-- HERO / Landing (full screen) -->
+    <section id="hero" class="hero-wrap">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="bubble b1"></div>
+        <div class="bubble b2"></div>
+        <div class="bubble b3"></div>
+      </div>
+
+      <div class="hero-shell max-w-5xl mx-auto px-5 pt-5 w-full">
+        <!-- Header / Logo -->
+        <header id="top" class="flex items-center justify-between gap-3">
+          <a href="#themen" class="flex items-center gap-3 hero-fade">
+            <div id="brandLogoBtn" class="liquid-glass lg-chip lg-radius-md w-11 h-11 flex items-center justify-center border border-white/10 brand-logo" aria-label="LearnCraft Logo" title="Logo (du kannst es ersetzen)">
+  <!-- LOGO SLOT:
+       Ersetze das <svg> unten später einfach mit:
+       <img src="Bilder/dein-logo.png" alt="LearnCraft" class="w-7 h-7 object-contain">
+  -->
+  <svg viewBox="0 0 64 64" class="w-7 h-7" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="lcG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="rgba(56,189,248,1)"/>
+        <stop offset="0.5" stop-color="rgba(168,85,247,1)"/>
+        <stop offset="1" stop-color="rgba(236,72,153,1)"/>
+      </linearGradient>
+      <filter id="lcGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.2" result="b"/>
+        <feColorMatrix in="b" type="matrix"
+          values="1 0 0 0 0
+                  0 1 0 0 0
+                  0 0 1 0 0
+                  0 0 0 0.65 0" result="c"/>
+        <feMerge>
+          <feMergeNode in="c"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- Monogram: LC -->
+    <path d="M19 14v36h24" fill="none" stroke="url(#lcG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" filter="url(#lcGlow)"/>
+    <path d="M46 20c-2-3.5-6-6-11-6-8 0-14 6-14 18s6 18 14 18c5 0 9-2.5 11-6" fill="none" stroke="url(#lcG)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" filter="url(#lcGlow)"/>
+  </svg>
+</div>
+
+            <div class="leading-tight">
+              <div class="text-white/90 font-extrabold text-base">LearnCraft Pro</div>
+              <div class="text-white/60 text-xs">Lernkarten & Tools für die Werkstatt</div>
+            </div>
+          </a>
+
+          <div class="flex items-center gap-2 hero-fade">
+            <button id="openQuizTop" class="lg-btn inline-flex items-center gap-2" type="button">
+              <i data-feather="edit-3" class="w-4 h-4"></i><span>Quiz</span>
+            </button>
+            <a href="#pricing" class="lg-btn inline-flex items-center gap-2">
+              <i data-feather="tag" class="w-4 h-4"></i><span>Pricing</span>
+            </a>
+            <a href="#themen" class="lg-btn inline-flex items-center gap-2">
+              <i data-feather="grid" class="w-4 h-4"></i><span>Themen</span>
+            </a>
+          </div>
+        </header>
+
+        <!-- Hero content -->
+        <div class="mt-10 md:mt-14 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div class="md:col-span-7 hero-fade">
+            <div class="liquid-glass lg-chip lg-radius-pill inline-flex items-center gap-2 px-3 py-1 text-xs text-white/70 border border-white/10 mb-4 hero-enter">
+              <i data-feather="zap" class="w-4 h-4"></i>
+              <span>Für 1.–2. Lehrjahr · Spickzettel, aber legal</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-[1.05] m-0 hero-enter-2">
+              Willkommen bei <span class="text-white/90">LearnCraft</span>.
+              Lern schneller, <span class="text-white/80">praktischer</span>, ohne unnötigen Stress.
+            </h1>
+
+            <p class="text-white/75 mt-4 mb-0 text-base sm:text-lg hero-enter-3">
+              Karten, Mini-Rechner und Profi-Tipps für Fahrzeugtechnik. Lokal gespeichert, schnell gesucht, mit echten Verlaufsdaten.
+            </p>
+
+            <div class="mt-6 flex flex-col sm:flex-row gap-2 hero-enter-3">
+              <a href="#themen" class="lg-btn inline-flex items-center justify-center gap-2">
+                <i data-feather="play" class="w-4 h-4"></i><span>Jetzt starten</span>
+              </a>
+              <a href="#stats" class="lg-btn inline-flex items-center justify-center gap-2">
+                <i data-feather="bar-chart-2" class="w-4 h-4"></i><span>Fortschritt</span>
+              </a>
+              <button id="openQuizHero" class="lg-btn inline-flex items-center justify-center gap-2" type="button">
+                <i data-feather="edit-3" class="w-4 h-4"></i><span>Prüfungsmodus</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="md:col-span-5 hero-card-fade">
+            <div class="liquid-glass lg-chip lg-radius-xl p-5 border border-white/10 hero-surface hero-enter-2">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-white/60 text-xs uppercase tracking-wide">Inklusive</div>
+                  <div class="text-white/90 font-extrabold text-lg">Das bekommst du sofort</div>
+                </div>
+                <span class="liquid-glass lg-chip lg-radius-pill px-2 py-0.5 text-[11px] text-white/70 border border-white/10">Offline-first</span>
+              </div>
+
+              <ul class="mt-4 space-y-2 text-white/80 text-sm">
+                <li class="flex items-start gap-2"><i data-feather="check-circle" class="w-4 h-4 mt-0.5"></i><span>Offline-Suche (UND/ODER)</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check-circle" class="w-4 h-4 mt-0.5"></i><span>Verlauf + Heatmap + Sessions</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check-circle" class="w-4 h-4 mt-0.5"></i><span>Favoriten & Notizen pro Thema</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check-circle" class="w-4 h-4 mt-0.5"></i><span>Mini-Quiz (Prüfungsmodus)</span></li>
+              </ul>
+
+              <div class="mt-4 text-white/60 text-xs">
+                Tipp: Such z. B. <span class="text-white/80">reifen dot</span> oder <span class="text-white/80">reifen|felgen</span>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 flex justify-center hero-scroll">
+          <div class="liquid-glass lg-chip lg-radius-pill px-4 py-2 border border-white/10 inline-flex items-center gap-2 text-xs text-white/70">
+            <i data-feather="arrow-down" class="w-4 h-4"></i>
+            <span>Scroll runter, dann “lappt” der Inhalt drüber</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENT (overlaps hero) -->
+    <section class="content-wrap">
+      <div class="max-w-5xl mx-auto px-5">
+
+        <!-- Quick Panel (Widgets + Creator sauber nebeneinander) -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 -mt-14 mb-6">
+          <!-- Widgets -->
+          <div class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 lg:col-span-2">
+            <div class="flex flex-wrap items-center gap-2 md:gap-4">
+              <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+                <div class="lg-icon"><i data-feather="calendar" class="w-4 h-4"></i></div>
+                <div>
+                  <p class="lg-muted m-0">Date</p>
+                  <div class="font-extrabold" id="date">–</div>
+                </div>
+              </div>
+
+              <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+                <div class="lg-icon"><i data-feather="clock" class="w-4 h-4"></i></div>
+                <div>
+                  <p class="lg-muted m-0">Time</p>
+                  <div class="font-extrabold" id="time">–</div>
+                </div>
+              </div>
+
+              <div class="lg-divider"></div>
+
+              <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+                <div class="lg-icon"><i data-feather="cloud" class="w-4 h-4"></i></div>
+                <div>
+                  <p class="lg-muted m-0">Weather · Bern</p>
+                  <div class="font-extrabold"><span id="wxText">–</span> · <span id="wxTemp">–°C</span></div>
+                </div>
+              </div>
+
+              <div class="flex-1"></div>
+
+              <span class="liquid-glass lg-chip lg-radius-pill px-3 py-1 text-xs text-white/70 inline-flex items-center gap-2 border border-white/10">
+                <i data-feather="shield" class="w-4 h-4"></i>
+                <span>Alles bleibt lokal</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Creator -->
+          <div class="liquid-glass lg-surface lg-radius-xl p-4">
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <div class="liquid-glass lg-chip lg-radius-md w-11 h-11 flex items-center justify-center border border-white/10"
+                     style="background: radial-gradient(120% 120% at 10% 10%, rgba(236,72,153,0.22) 0%, rgba(168,85,247,0.14) 40%, rgba(56,189,248,0.10) 100%);">
+                  <i data-feather="instagram" class="w-5 h-5"></i>
+                </div>
+                <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-white/20"
+                      style="background: radial-gradient(circle at 30% 30%, rgba(52,211,153,1) 0%, rgba(16,185,129,1) 55%, rgba(5,150,105,1) 100%);"></span>
+              </div>
+
+              <div class="leading-tight">
+                <div class="text-white/60 text-xs uppercase tracking-wide">Creator</div>
+                <div class="flex items-center gap-2">
+                  <div class="text-white/90 font-extrabold text-lg">Demir</div>
+                  <span class="liquid-glass lg-chip lg-radius-pill px-2 py-0.5 text-[11px] text-white/70 border border-white/10">
+                    @demir.wsx
+                  </span>
+                </div>
+                <div class="text-white/60 text-sm">Instagram</div>
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-col gap-2">
+              <a id="igLink"
+                 class="lg-btn inline-flex items-center justify-center gap-2 w-full"
+                 href="https://www.instagram.com/demir.wsx/" target="_blank" rel="noopener">
+                <i data-feather="user-plus" class="w-4 h-4"></i>
+                <span>Folgen</span>
+              </a>
+
+              <button id="copyIg"
+                      type="button"
+                      class="lg-btn inline-flex items-center justify-center gap-2 w-full">
+                <i data-feather="copy" class="w-4 h-4"></i>
+                <span>@demir.wsx kopieren</span>
+              </button>
+
+              <span id="copyToast" class="hidden liquid-glass lg-chip lg-radius-pill px-3 py-1 border border-white/10 text-xs text-white/70 text-center">
+                Kopiert ✅
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions: Continue + Due + Favorites -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div class="liquid-glass lg-surface lg-radius-xl p-4 lg:col-span-2">
+            <div class="flex items-center justify-between gap-3">
+              <h2 class="text-lg font-extrabold m-0 flex items-center gap-2">
+                <i data-feather="corner-up-right" class="w-5 h-5 text-sky-300"></i>
+                <span>Schnellzugriff</span>
+              </h2>
+              <div class="flex items-center gap-2">
+                <button id="openTopicManager" class="lg-btn inline-flex items-center gap-2" type="button">
+                  <i data-feather="sliders" class="w-4 h-4"></i><span>Themen-Manager</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <!-- Continue -->
+              <div class="liquid-glass lg-chip lg-radius-xl p-4 border border-white/10">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="text-white/60 text-xs uppercase tracking-wide">Weiterlernen</div>
+                    <div id="continueTitle" class="text-white/90 font-extrabold text-base">Noch nichts geöffnet</div>
+                    <div id="continueMeta" class="text-white/60 text-xs mt-1">Öffne ein Thema, dann merkt es sich das.</div>
+                  </div>
+                  <button id="continueBtn" class="icon-btn" type="button" aria-label="Weitermachen" disabled style="opacity:.6">
+                    <i data-feather="play" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Due -->
+              <div class="liquid-glass lg-chip lg-radius-xl p-4 border border-white/10">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="text-white/60 text-xs uppercase tracking-wide">Heute wiederholen</div>
+                    <div class="text-white/90 font-extrabold text-base"><span id="dueCount">0</span> Themen</div>
+                    <div class="text-white/60 text-xs mt-1">Basierend auf “zuletzt geöffnet” (Spaced-Repetition light).</div>
+                  </div>
+                  <button id="jumpDue" class="icon-btn" type="button" aria-label="Zu Wiederholen anzeigen">
+                    <i data-feather="refresh-cw" class="w-4 h-4"></i>
+                  </button>
+                </div>
+                <div id="dueList" class="mt-3 text-sm text-white/80 space-y-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Favorites -->
+          <div class="liquid-glass lg-surface lg-radius-xl p-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-extrabold m-0 flex items-center gap-2">
+                <i data-feather="star" class="w-5 h-5 text-yellow-300"></i>
+                <span>Favoriten</span>
+              </h3>
+              <button id="favHint" class="icon-btn" type="button" aria-label="Hinweis">
+                <i data-feather="info" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="text-white/60 text-xs mt-2">Stern auf einer Karte klicken → erscheint hier.</div>
+            <div id="favChips" class="mt-3 chip-row"></div>
+          </div>
+        </section>
+
+        <!-- Search -->
+        <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-6 sticky top-2 md:top-4 z-20">
+          <div class="flex flex-wrap items-center gap-2 md:gap-4">
+            <div class="relative flex-1 min-w-[220px]">
+              <i data-feather="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 w-4 h-4"></i>
+              <input id="q" type="search"
+                placeholder="Suchen: mehrere Wörter möglich (z. B. 'reifen dot' oder 'drehmoment rad')"
+                class="w-full bg-white/5 text-white border border-white/10 rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10">
+            </div>
+
+            <div class="flex gap-2">
+              <button id="viewCards" aria-pressed="true" class="lg-btn" type="button">
+                <i data-feather="grid" class="w-4 h-4"></i><span>Karten</span>
+              </button>
+              <button id="viewList" aria-pressed="false" class="lg-btn" type="button">
+                <i data-feather="list" class="w-4 h-4"></i><span>Liste</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-3 flex flex-col gap-2">
+            <div class="text-white/60 text-xs">
+              Chips = schneller Filter. Leerzeichen = UND. <span class="text-white/80">|</span> = ODER (z. B. <span class="text-white/80">reifen|felgen</span>).
+            </div>
+            <div id="suggestChips" class="chip-row"></div>
+            <div id="recentSearchRow" class="flex items-center gap-2 flex-wrap text-xs text-white/60 hidden">
+              <span class="text-white/60">Letzte Suchen:</span>
+              <span id="recentSearchChips" class="chip-row"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Themen -->
+        <section id="themen" class="scroll-mt-24">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl sm:text-3xl font-bold">Wähle ein Thema</h2>
+            <span class="liquid-glass lg-chip lg-radius-pill px-3 py-1 text-xs text-white/70 inline-flex items-center gap-2 border border-white/10">
+              <i data-feather="award" class="w-4 h-4"></i>
+              <span>1.–2. Lehrjahr</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4" id="grid"></div>
+
+          <!-- List View -->
+          <div id="listWrap" class="hidden mt-4 liquid-glass lg-surface lg-radius-xl p-3 md:p-4">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Titel</th>
+                  <th>Keywords</th>
+                  <th style="width:160px">Aktion</th>
+                </tr>
+              </thead>
+              <tbody id="listBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Stats -->
+        <section id="stats" class="scroll-mt-24 mt-10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl sm:text-3xl font-bold">Deine Fortschritte</h2>
+            <div class="flex items-center gap-2">
+              <button id="themeToggle" class="icon-btn" type="button" aria-label="Theme">
+                <i data-feather="moon" class="w-4 h-4"></i>
+              </button>
+              <button id="resetStats" class="lg-btn" type="button">
+                <i data-feather="trash-2" class="w-4 h-4"></i><span>Reset</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- KPIs -->
+            <div class="liquid-glass lg-surface lg-radius-xl p-4">
+              <div class="text-white/60 text-xs uppercase tracking-wide">Übersicht</div>
+
+              <div class="mt-3 space-y-3">
+                <div class="kpi">
+                  <div>
+                    <div class="v mono" id="kpiTopics">0</div>
+                    <div class="l">Themen geöffnet</div>
+                  </div>
+                  <div class="r">
+                    <div class="v mono" id="kpiDays">0</div>
+                    <div class="l">aktive Tage (30)</div>
+                  </div>
+                </div>
+
+                <div class="mini-divider"></div>
+
+                <div class="kpi">
+                  <div>
+                    <div class="v mono" id="kpiMinutes">0</div>
+                    <div class="l">Lernminuten (gesamt)</div>
+                  </div>
+                  <div class="r">
+                    <div class="v mono" id="kpiStreak">0</div>
+                    <div class="l">Streak (Tage)</div>
+                  </div>
+                </div>
+
+                <div class="mini-divider"></div>
+
+                <div class="text-white/70 text-xs">Heute: <span class="mono" id="todayCount">0</span> Öffnungen</div>
+                <div class="bar"><div id="todayBar"></div></div>
+
+                <div class="text-white/60 text-xs mt-2">
+                  Tipp: Öffne 2–3 Themen pro Tag. Der Streak ist weniger “Motivation” und mehr “Beweis, dass du existierst”.
+                </div>
+              </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="liquid-glass lg-surface lg-radius-xl p-4 lg:col-span-2">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="text-white/60 text-xs uppercase tracking-wide">Verlauf</div>
+                  <div class="text-white/90 font-extrabold text-lg">Aktivität (30 Tage)</div>
+                </div>
+                <div class="stats-tabs">
+                  <button class="tab-btn" data-tab="opens" aria-selected="true" type="button">Öffnungen</button>
+                  <button class="tab-btn" data-tab="minutes" aria-selected="false" type="button">Minuten</button>
+                  <button class="tab-btn" data-tab="quiz" aria-selected="false" type="button">Quiz</button>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <canvas id="trend" height="160" style="width:100%; display:block;"></canvas>
+              </div>
+
+              <div class="mt-4">
+                <div class="text-white/60 text-xs uppercase tracking-wide">Heatmap</div>
+                <div class="text-white/60 text-xs mt-1">Hover über Kästchen → Tag & Aktivität.</div>
+                <div class="mt-3 heatmap" id="heatmap"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Top Topics -->
+            <div class="liquid-glass lg-surface lg-radius-xl p-4 lg:col-span-2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-white/60 text-xs uppercase tracking-wide">Top</div>
+                  <div class="text-white/90 font-extrabold text-lg">Meist geöffnet</div>
+                </div>
+                <button id="openSessions" class="lg-btn" type="button">
+                  <i data-feather="activity" class="w-4 h-4"></i><span>Sessions</span>
+                </button>
+              </div>
+              <div id="topTopics" class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+
+            <!-- Notizen Quick -->
+            <div class="liquid-glass lg-surface lg-radius-xl p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-white/60 text-xs uppercase tracking-wide">Notizen</div>
+                  <div class="text-white/90 font-extrabold text-lg">Dein Spickzettel</div>
+                </div>
+                <button id="openNotes" class="icon-btn" type="button" aria-label="Notizen öffnen">
+                  <i data-feather="file-text" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <textarea id="globalNotes" class="mt-3 w-full bg-white/5 text-white border border-white/10 rounded-lg p-3 min-h-[160px] focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10"
+                        placeholder="Hier rein: eigene Regeln, Merksätze, Prüfungsfragen..."></textarea>
+              <div class="mt-2 text-white/60 text-xs">Wird lokal gespeichert (localStorage). Kein Server, kein Drama.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tipps -->
+        <section id="tipps" class="scroll-mt-24 mt-10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl sm:text-3xl font-bold">Profi-Tipps</h2>
+            <button id="addTip" class="lg-btn" type="button">
+              <i data-feather="plus" class="w-4 h-4"></i><span>Neuer Tipp</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="liquid-glass lg-surface lg-radius-xl p-4 lg:col-span-2">
+              <div class="text-white/60 text-xs uppercase tracking-wide">Für Werkstatt & Prüfung</div>
+              <div id="tipsList" class="mt-3 space-y-3"></div>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-xl p-4">
+              <div class="text-white/60 text-xs uppercase tracking-wide">Eigene Tipps</div>
+              <textarea id="tipsNotes" class="mt-3 w-full bg-white/5 text-white border border-white/10 rounded-lg p-3 min-h-[220px] focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10"
+                        placeholder="Deine eigenen Profi-Tipps / Checklisten..."></textarea>
+              <div class="mt-2 text-white/60 text-xs">Auch lokal gespeichert. Natürlich.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pricing -->
+        <section id="pricing" class="scroll-mt-24 mt-10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl sm:text-3xl font-bold">Pricing</h2>
+            <span class="liquid-glass lg-chip lg-radius-pill px-3 py-1 text-xs text-white/70 inline-flex items-center gap-2 border border-white/10">
+              <i data-feather="lock" class="w-4 h-4"></i>
+              <span>Nur Demo (UI)</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="liquid-glass lg-surface lg-radius-xl p-5 border border-white/10">
+              <div class="text-white/60 text-xs uppercase tracking-wide">Einmalig</div>
+              <div class="text-white/90 font-extrabold text-xl mt-1">Lebenslang</div>
+              <div class="text-white/70 text-sm mt-2">Zahl einmal. Nutz es für immer.</div>
+              <div class="mt-4 text-3xl font-extrabold">CHF 39</div>
+              <ul class="mt-4 space-y-2 text-white/80 text-sm">
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Alle Themen</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Verlauf & Stats</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Quiz-Modus</span></li>
+              </ul>
+              <button class="lg-btn w-full justify-center mt-5" type="button"><i data-feather="shopping-cart" class="w-4 h-4"></i><span>Kaufen</span></button>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-xl p-5 border border-white/10"
+                 style="outline: 2px solid rgba(56,189,248,0.28);">
+              <div class="text-white/60 text-xs uppercase tracking-wide">Abo</div>
+              <div class="text-white/90 font-extrabold text-xl mt-1">1 Monat</div>
+              <div class="text-white/70 text-sm mt-2">Flexibel testen.</div>
+              <div class="mt-4 text-3xl font-extrabold">CHF 6</div>
+              <ul class="mt-4 space-y-2 text-white/80 text-sm">
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Alle Themen</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Updates inklusive</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Kündbar jederzeit</span></li>
+              </ul>
+              <button class="lg-btn w-full justify-center mt-5" type="button"><i data-feather="credit-card" class="w-4 h-4"></i><span>Starten</span></button>
+            </div>
+
+            <div class="liquid-glass lg-surface lg-radius-xl p-5 border border-white/10">
+              <div class="text-white/60 text-xs uppercase tracking-wide">Abo</div>
+              <div class="text-white/90 font-extrabold text-xl mt-1">3 Jahre</div>
+              <div class="text-white/70 text-sm mt-2">Sparpaket für Durchzieher.</div>
+              <div class="mt-4 text-3xl font-extrabold">CHF 99</div>
+              <ul class="mt-4 space-y-2 text-white/80 text-sm">
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Alles drin</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Priorisierte Features</span></li>
+                <li class="flex items-start gap-2"><i data-feather="check" class="w-4 h-4 mt-0.5"></i><span>Bestes Preis/Leistung</span></li>
+              </ul>
+              <button class="lg-btn w-full justify-center mt-5" type="button"><i data-feather="zap" class="w-4 h-4"></i><span>Wählen</span></button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="mt-14 mb-10 text-center text-white/55 text-sm">
+          LearnCraft Pro · Offline-first · localStorage · Keine Ausreden.
+        </footer>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Bar -->
+  <nav id="bottomBar" aria-label="Navigation">
+    <a class="bar-item active" href="#themen" data-target="themen" aria-label="Themen">
+      <i data-feather="grid"></i>
+      <div>Themen</div>
+    </a>
+    <a class="bar-item" href="#stats" data-target="stats" aria-label="Fortschritt">
+      <i data-feather="bar-chart-2"></i>
+      <div>Stats</div>
+    </a>
+    <button class="bar-item" id="openQuizBottom" type="button" aria-label="Quiz">
+      <i data-feather="edit-3"></i>
+      <div>Quiz</div>
+    </button>
+    <a class="bar-item" href="#tipps" data-target="tipps" aria-label="Tipps">
+      <i data-feather="tool"></i>
+      <div>Tipps</div>
+    </a>
+    <a class="bar-item" href="#pricing" data-target="pricing" aria-label="Pricing">
+      <i data-feather="tag"></i>
+      <div>Pricing</div>
+    </a>
+  </nav>
+
+  <!-- Topic Manager Modal -->
+  <div id="topicManager" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Themen-Manager">
+    <div class="modal p-5">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="text-white/60 text-xs uppercase tracking-wide">Themen</div>
+          <div class="text-white/90 font-extrabold text-lg">Aktivieren / deaktivieren</div>
+        </div>
+        <button id="closeTopicManager" class="icon-btn" type="button" aria-label="Schliessen">
+          <i data-feather="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="mt-4" id="topicManagerList"></div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button id="enableAll" class="lg-btn" type="button"><i data-feather="check-square" class="w-4 h-4"></i><span>Alle an</span></button>
+        <button id="disableAll" class="lg-btn" type="button"><i data-feather="square" class="w-4 h-4"></i><span>Alle aus</span></button>
+      </div>
+      <div class="mt-3 text-white/60 text-xs">Tipp: Wenn du Lernstress hast: weniger Themen anzeigen, mehr Fokus.</div>
+    </div>
+  </div>
+
+  <!-- Sessions Modal -->
+  <div id="sessionsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Sessions">
+    <div class="modal p-5">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="text-white/60 text-xs uppercase tracking-wide">Stats</div>
+          <div class="text-white/90 font-extrabold text-lg">Sessions</div>
+        </div>
+        <button id="closeSessions" class="icon-btn" type="button" aria-label="Schliessen">
+          <i data-feather="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="mt-4">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Start</th>
+              <th>Ende</th>
+              <th>Dauer</th>
+              <th>Thema</th>
+            </tr>
+          </thead>
+          <tbody id="sessionsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes Modal -->
+  <div id="notesModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Notizen">
+    <div class="modal p-5">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="text-white/60 text-xs uppercase tracking-wide">Notizen</div>
+          <div class="text-white/90 font-extrabold text-lg">Dein Spickzettel</div>
+        </div>
+        <button id="closeNotes" class="icon-btn" type="button" aria-label="Schliessen">
+          <i data-feather="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <textarea id="notesBig" class="mt-4 w-full bg-white/5 text-white border border-white/10 rounded-lg p-3 min-h-[320px] focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10"
+                placeholder="Alles was dir hilft: Merksätze, Formeln, Checks..."></textarea>
+
+      <div class="mt-3 flex gap-2">
+        <button id="saveNotesBig" class="lg-btn" type="button"><i data-feather="save" class="w-4 h-4"></i><span>Speichern</span></button>
+        <button id="exportNotes" class="lg-btn" type="button"><i data-feather="download" class="w-4 h-4"></i><span>Export (TXT)</span></button>
+      </div>
+      <div class="mt-2 text-white/60 text-xs">Export ist ein lokaler Download. Kein Backend. Kein Tracking. Nur du.</div>
+    </div>
+  </div>
+
+  <!-- Note Modal per topic -->
+  <div id="noteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Notiz">
+    <div class="modal p-5">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="text-white/60 text-xs uppercase tracking-wide">Themen-Notiz</div>
+          <div class="text-white/90 font-extrabold text-lg" id="noteTitle">Notiz</div>
+        </div>
+        <button id="closeNote" class="icon-btn" type="button" aria-label="Schliessen">
+          <i data-feather="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <textarea id="noteText" class="mt-4 w-full bg-white/5 text-white border border-white/10 rounded-lg p-3 min-h-[220px] focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10"
+                placeholder="Deine Notiz zu diesem Thema..."></textarea>
+
+      <div class="mt-3 flex gap-2">
+        <button id="saveNote" class="lg-btn" type="button"><i data-feather="save" class="w-4 h-4"></i><span>Speichern</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal -->
+  <div id="quizModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Quiz">
+    <div class="modal p-5">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="text-white/60 text-xs uppercase tracking-wide">Prüfungsmodus</div>
+          <div class="text-white/90 font-extrabold text-lg">Mini-Quiz</div>
+        </div>
+        <button id="closeQuiz" class="icon-btn" type="button" aria-label="Schliessen">
+          <i data-feather="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 lg:col-span-1">
+          <div class="text-white/60 text-xs uppercase tracking-wide">Einstellungen</div>
+          <div class="mt-3 space-y-3 text-sm text-white/80">
+            <label class="flex items-center gap-2">
+              <input id="quizShuffle" type="checkbox" class="accent-sky-400" checked>
+              <span>Mischen</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input id="quizTimer" type="checkbox" class="accent-sky-400">
+              <span>Timer (45s)</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input id="quizOnlyFav" type="checkbox" class="accent-sky-400">
+              <span>Nur Favoriten</span>
+            </label>
+
+            <div class="mini-divider"></div>
+
+            <div class="text-white/60 text-xs uppercase tracking-wide">Themen wählen</div>
+            <div id="quizTopics" class="chip-row"></div>
+
+            <div class="mini-divider"></div>
+
+            <button id="startQuiz" class="lg-btn w-full justify-center" type="button">
+              <i data-feather="play" class="w-4 h-4"></i><span>Start</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="liquid-glass lg-surface lg-radius-xl p-4 lg:col-span-2">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="text-white/60 text-xs uppercase tracking-wide">Frage</div>
+              <div class="text-white/90 font-extrabold text-lg" id="quizQ">Drück Start</div>
+            </div>
+            <div class="text-white/70 text-sm mono">
+              <span id="quizIdx">0</span>/<span id="quizTotal">0</span>
+              <span id="quizTime" class="ml-2 hidden">45</span>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3" id="quizAnswers"></div>
+
+          <div class="mt-4 flex items-center justify-between gap-2">
+            <div class="text-white/60 text-xs">
+              Richtig: <span class="mono" id="quizCorrect">0</span> · Falsch: <span class="mono" id="quizWrong">0</span>
+            </div>
+            <div class="flex gap-2">
+              <button id="quizSkip" class="lg-btn" type="button"><i data-feather="skip-forward" class="w-4 h-4"></i><span>Skip</span></button>
+              <button id="quizEnd" class="lg-btn" type="button"><i data-feather="x-circle" class="w-4 h-4"></i><span>Ende</span></button>
+            </div>
+          </div>
+
+          <div id="quizFeedback" class="mt-3 text-white/80 text-sm"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+       LocalStorage keys
+    ========================= */
+    const LS = {
+      theme: 'lc_theme',
+      topicsEnabled: 'lc_topics_enabled',
+      topicStats: 'lc_topic_stats',
+      dailyStats: 'lc_daily_stats',
+      minutes: 'lc_minutes_total',
+      streak: 'lc_streak',
+      lastDay: 'lc_last_day',
+      lastTopic: 'lc_last_topic',
+      favorites: 'lc_favorites',
+      topicNotes: 'lc_topic_notes',
+      globalNotes: 'lc_global_notes',
+      tipsNotes: 'lc_tips_notes',
+      tips: 'lc_tips',
+      recentSearch: 'lc_recent_search',
+      sessions: 'lc_sessions',
+      quizStats: 'lc_quiz_stats',
+      quizSelected: 'lc_quiz_selected'
+    };
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    // Feather-Icons sind über CDN. Wenn’s mal nicht lädt, soll nicht die ganze Seite sterben.
+    function featherReplace(){
+      try{
+        if (window.feather && typeof window.feather.replace === 'function') window.feather.replace();
+      }catch(e){}
+    }
+
+    function loadJSON(key, fallback){
+      try{
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      }catch(e){ return fallback; }
+    }
+    function saveJSON(key, value){
+      try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+    }
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+    /* =========================
+       Topics data (edit here)
+    ========================= */
+    const DEFAULT_TOPICS = [
+      { id:'hydraulik', title:'HydraulikPRO', desc:'Grundlagen, Druck, Kraft, Wartung. Einfach & praxisnah.', badge:'Maschinen',
+        img:'Bilder/Hydraulikoele.jpg', href:'HydraulikPRO.html',
+        keywords:'hydraulik druck kraft zylinder öl leitung pumpe',
+        quiz: [
+          {q:'Was beschreibt der Druck in der Hydraulik?', a:['Kraft pro Fläche','Weg pro Zeit','Masse pro Volumen','Energie pro Zeit'], c:0},
+          {q:'Welche Einheit hat Druck?', a:['Pa','Nm','W','kg'], c:0},
+          {q:'Wozu dient ein Hydraulikzylinder?', a:['Kraft erzeugen','Spannung messen','Kühlung','Zündung'], c:0}
+        ]
+      },
+      { id:'reifen', title:'ReifenPRO', desc:'DOT, Indizes, Basis-Checks, typische Fehler.', badge:'Fahrzeugtechnik',
+        img:'Bilder/Reifen.png', href:'ReifenPRO.html',
+        keywords:'reifen dot lastindex geschwindigkeitsindex profiltiefe luftdruck bremsweg',
+        quiz: [
+          {q:'DOT-Code (4-stellig) bedeutet…', a:['Woche/Jahr','Tag/Monat','Reifendruck','Hersteller'], c:0},
+          {q:'Was ist wichtiger Sicherheits-Check?', a:['Profiltiefe','Felgenfarbe','Antenne','Radio'], c:0},
+          {q:'Lastindex beschreibt…', a:['max. Tragfähigkeit','max. Geschwindigkeit','Raddurchmesser','Gummihärte'], c:0}
+        ]
+      },
+      { id:'rechner', title:'Rechner', desc:'Schnell rechnen: Kraft, Druck, Hebelarm, Einheiten.', badge:'Tools',
+        img:'Bilder/Rechner.png', href:'Rechner.html',
+        keywords:'rechner umrechnung drehmoment kraft druck formel hebelarm einheit'
+      },
+      { id:'bremsen', title:'BremsenPRO', desc:'Grundlagen, Checks, typische Fehlerbilder.', badge:'Sicherheit',
+        img:'Bilder/Bremsen.png', href:'BremsenPRO.html',
+        keywords:'bremsen bremsweg reibung scheibe belag abs sicherheit',
+        quiz: [
+          {q:'ABS verhindert primär…', a:['Blockieren der Räder','Überhitzung des Motors','Lenkwinkel','Reifendruckverlust'], c:0},
+          {q:'Bremsbelagwechsel: wichtig?', a:['Drehmoment beachten','Wischwasser nachfüllen','Antenne tauschen','Öl ablassen'], c:0}
+        ]
+      },
+      { id:'felgen', title:'FelgenPRO', desc:'ET/PCD/Nabe, Montage-Checkliste, Mini-Rechner.', badge:'Rad & Reifen',
+        img:'Bilder/alufelgen.jpg', href:'FelgenPRO.html',
+        keywords:'felgen et einpresstiefe lochkreis pcd nabe zentrierung drehmoment radschrauben',
+        quiz: [
+          {q:'ET bedeutet…', a:['Einpresstiefe','Einspritzzeit','Erdtemperatur','Elektrische Traktion'], c:0},
+          {q:'Lochkreis (PCD) beschreibt…', a:['Anordnung der Schraubenlöcher','Bremsdruck','Reifendruck','Sturz'], c:0}
+        ]
+      },
+      { id:'laerm', title:'LärmPRO', desc:'dB→Zeit, Folgen, Schutzmassnahmen, Mini-Quiz.', badge:'Arbeitsschutz',
+        img:'Bilder/Laerm.png', href:'LaermPRO.html',
+        keywords:'lärm laerm db db(a) gehörschutz snr zeit tinnitus arbeitsschutz',
+        quiz: [
+          {q:'Lärm kann langfristig verursachen…', a:['Hörschäden','bessere Sicht','mehr Grip','kürzere Bremswege'], c:0},
+          {q:'Gehörschutz ist wichtig bei…', a:['hohen dB-Werten','niedriger Temperatur','heller Beleuchtung','sauberem Boden'], c:0}
+        ]
+      },
+      { id:'lenkgeometrie', title:'LenkgeometriePRO', desc:'Spur, Sturz, Nachlauf, Spreizung, Lenkrollradius, Ackermann. Mit Aufgaben & Mini-Rechnern.', badge:'Fahrwerk',
+        img:'Bilder/Lenkgeometrie.jpg', href:'LenkgeometriePRO.html',
+        keywords:'lenkgeometrie achsgeometrie achsvermessung spur toe vorspur nachspur sturz camber nachlauf caster spreizung sai kpi lenkrollradius scrub radius spurdifferenz ackermann achsversatz symmetrieachse geometrische fahrachse',
+        quiz: [
+          {q:'Sturz (Camber) ist…', a:['Radneigung in Frontansicht','Radstand','Lenkwinkel','Reifendruck'], c:0},
+          {q:'Spur beeinflusst…', a:['Geradeauslauf/Reifenabrieb','Öltemperatur','Lichtstärke','Kühlmittelstand'], c:0}
+        ]
+      },
+
+      { id:'lenkung', title:'LenkungPRO', desc:'Lenktrapez, Lenkgetriebe, Servolenkung & Checks. Praxisnah mit Quiz.', badge:'Fahrzeugtechnik',
+        img:'Bilder/Lenkung.png', href:'LenkungPRO.html',
+        keywords:'lenkung lenktrapez lenkgetriebe servolenkung spurstange axiallager lenksäule lenksauele lenkstockhebel zahnstange kugelkopf spiel einstellung',
+        quiz: [
+          {q:'Welche Aufgabe hat das Lenkgetriebe?', a:['Lenkbewegung übersetzen und an die Räder übertragen','Kraftstoffdruck erhöhen','Bremsdruck verteilen','Luft filtern'], c:0},
+          {q:'Wofür ist das Lenktrapez (Spurstangen-System) da?', a:['Überträgt die Lenkbewegung auf beide Räder und hält die Spur','Erhöht Motordrehzahl','Kühlt das Getriebe','Misst Reifendruck'], c:0},
+          {q:'Typisches Symptom für zu viel Spiel in der Lenkung?', a:['Unpräzises/„schwammiges“ Lenkgefühl','Höhere Kühlmitteltemperatur','Stärkeres Licht','Mehr Ölstand'], c:0},
+          {q:'Servolenkung unterstützt primär…', a:['Lenkkraft reduzieren','Bremsweg verkürzen','Reifendruck erhöhen','Abgas reinigen'], c:0},
+          {q:'Worauf achten bei Spurstangenkopf/Kugelkopf?', a:['Manschette/Riss, Spiel, Sicherung','Batteriespannung','Ölviskosität','Zündkerzenabstand'], c:0}
+        ]
+      },
+
+    ];
+
+    function getTopics(){
+      const enabledMap = loadJSON(LS.topicsEnabled, null);
+      if (!enabledMap) return DEFAULT_TOPICS.map(t => ({...t, enabled:true}));
+      return DEFAULT_TOPICS.map(t => ({...t, enabled: enabledMap[t.id] !== false}));
+    }
+
+    /* =========================
+       Stats storage helpers
+    ========================= */
+    function todayKey(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const da = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${da}`;
+    }
+    function dayDiff(a,b){
+      const da = new Date(a+'T00:00:00');
+      const db = new Date(b+'T00:00:00');
+      return Math.round((db-da)/86400000);
+    }
+
+    function getTopicStats(){ return loadJSON(LS.topicStats, {}); }
+    function setTopicStats(v){ saveJSON(LS.topicStats, v); }
+    function getDailyStats(){ return loadJSON(LS.dailyStats, {}); }
+    function setDailyStats(v){ saveJSON(LS.dailyStats, v); }
+    function getSessions(){ return loadJSON(LS.sessions, []); }
+    function setSessions(v){ saveJSON(LS.sessions, v); }
+
+    function trackOpen(topicId){
+      const tstats = getTopicStats();
+      tstats[topicId] = tstats[topicId] || { opens:0, minutes:0, last:null };
+      tstats[topicId].opens += 1;
+      tstats[topicId].last = Date.now();
+      setTopicStats(tstats);
+
+      const dk = todayKey();
+      const dstats = getDailyStats();
+      dstats[dk] = dstats[dk] || { opens:0, minutes:0, quiz:0 };
+      dstats[dk].opens += 1;
+      setDailyStats(dstats);
+
+      localStorage.setItem(LS.lastTopic, topicId);
+
+      updateStreak();
+      updateStatsUI();
+      updateContinueUI();
+      updateDueUI();
+    }
+
+    function updateStreak(){
+      const dk = todayKey();
+      const last = localStorage.getItem(LS.lastDay);
+      let streak = parseInt(localStorage.getItem(LS.streak) || '0', 10);
+
+      if (!last){
+        streak = 1;
+      } else {
+        const diff = dayDiff(last, dk);
+        if (diff === 0){
+          // same day, keep
+        } else if (diff === 1){
+          streak += 1;
+        } else if (diff > 1){
+          streak = 1;
+        }
+      }
+      localStorage.setItem(LS.lastDay, dk);
+      localStorage.setItem(LS.streak, String(streak));
+    }
+
+    function addMinutes(topicId, minutes){
+      const tstats = getTopicStats();
+      tstats[topicId] = tstats[topicId] || { opens:0, minutes:0, last:null };
+      tstats[topicId].minutes += minutes;
+      setTopicStats(tstats);
+
+      const dk = todayKey();
+      const dstats = getDailyStats();
+      dstats[dk] = dstats[dk] || { opens:0, minutes:0, quiz:0 };
+      dstats[dk].minutes += minutes;
+      setDailyStats(dstats);
+
+      const total = parseInt(localStorage.getItem(LS.minutes) || '0', 10) + minutes;
+      localStorage.setItem(LS.minutes, String(total));
+    }
+
+    /* =========================
+       Favorites & Notes
+    ========================= */
+    function getFavorites(){ return new Set(loadJSON(LS.favorites, [])); }
+    function setFavorites(set){ saveJSON(LS.favorites, Array.from(set)); }
+
+    function getTopicNotes(){ return loadJSON(LS.topicNotes, {}); }
+    function setTopicNotes(v){ saveJSON(LS.topicNotes, v); }
+
+    /* =========================
+       UI: theme / time / weather
+    ========================= */
+    function setThemeIcon(){
+      const isLight = document.documentElement.dataset.theme === 'light';
+      const btn = $('#themeToggle');
+      if (!btn) return;
+      btn.innerHTML = `<i data-feather="${isLight ? 'sun' : 'moon'}" class="w-4 h-4"></i>`;
+      featherReplace();
+    }
+
+    function applyTheme(theme){
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem(LS.theme, theme);
+      setThemeIcon();
+    }
+
+    function setupTime(){
+      const dateEl = $('#date');
+      const timeEl = $('#time');
+      const tick = () => {
+        const d = new Date();
+        if (dateEl) dateEl.textContent = d.toLocaleDateString('de-CH', { weekday:'short', year:'numeric', month:'2-digit', day:'2-digit' });
+        if (timeEl) timeEl.textContent = d.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // Simple weather stub (no API, no keys, keine Diskussion)
+    function setupWeather(){
+      const wxText = $('#wxText');
+      const wxTemp = $('#wxTemp');
+      if (!wxText || !wxTemp) return;
+      wxText.textContent = '–';
+      wxTemp.textContent = '–°C';
+
+      const fake = [
+        {t:'Wolkig', c:3},
+        {t:'Klar', c:1},
+        {t:'Leicht Regen', c:4},
+        {t:'Nebel', c:2}
+      ];
+      const pick = fake[Math.floor(Math.random()*fake.length)];
+      wxText.textContent = pick.t;
+      const temp = Math.round(2 + Math.random()*16);
+      wxTemp.textContent = `${temp}°C`;
+    }
+
+    /* =========================
+       UI: hero scroll progress + overlap
+    ========================= */
+    function setupHeroScroll(){
+      const hero = $('#hero');
+      const prog = $('#scrollProgress');
+      if (!hero || !prog) return;
+
+      const onScroll = () => {
+        const y = window.scrollY || 0;
+        const h = Math.max(1, hero.offsetHeight);
+        const p = clamp(y / (h*0.65), 0, 1);
+        hero.style.setProperty('--p', p.toFixed(3));
+
+        const docH = document.documentElement.scrollHeight - window.innerHeight;
+        const sp = docH > 0 ? clamp((y / docH) * 100, 0, 100) : 0;
+        prog.style.width = sp.toFixed(1) + '%';
+
+        updateBottomActive();
+      };
+      window.addEventListener('scroll', onScroll, { passive:true });
+      onScroll();
+    }
+
+    function updateBottomActive(){
+      const links = $$('#bottomBar .bar-item[data-target]');
+      if (!links.length) return;
+
+      const sections = links.map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+      const y = window.scrollY + 120;
+      let best = sections[0]?.id;
+
+      for (const s of sections){
+        const top = s.getBoundingClientRect().top + window.scrollY;
+        if (top <= y) best = s.id;
+      }
+      for (const a of links){
+        a.classList.toggle('active', a.dataset.target === best);
+      }
+    }
+
+    /* =========================
+       UI: Topics render (cards + list)
+    ========================= */
+    function renderTopics(){
+      const topics = getTopics().filter(t => t.enabled);
+      const grid = $('#grid');
+      const listBody = $('#listBody');
+      if (!grid || !listBody) return;
+
+      grid.innerHTML = '';
+      listBody.innerHTML = '';
+
+      for (const t of topics){
+        const card = document.createElement('article');
+        card.className = `liquid-glass lg-card lg-radius-lg p-4 flex flex-col gap-2.5 group searchable`;
+        card.dataset.id = t.id;
+        card.dataset.keywords = t.keywords;
+        card.dataset.search = `${t.title} ${t.desc} ${t.badge} ${t.keywords}`;
+
+        const quizBtn = (t.quiz && t.quiz.length)
+          ? `<button class="lg-btn topic-quiz" type="button" data-topic="${t.id}">
+              <i data-feather="edit-3" class="w-4 h-4"></i><span>Quiz</span>
+            </button>`
+          : `<span class="liquid-glass lg-chip lg-radius-pill px-2 py-1 text-[11px] text-white/70 border border-white/10">Tool</span>`;
+
+        card.innerHTML = `
+          <div class="relative overflow-hidden rounded-lg">
+            <img class="w-full aspect-video border border-white/10 rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
+                 loading="lazy" decoding="async" src="${t.img}" alt="${t.title}">
+            <span class="lg-badge">${t.badge}</span>
+          </div>
+          <h3 class="text-lg font-bold m-0">${t.title}</h3>
+          <p class="text-white/75 m-0">${t.desc}</p>
+          <div class="mt-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <button class="icon-btn topic-fav" type="button" aria-label="Favorit" data-topic="${t.id}">
+                <i data-feather="star" class="w-4 h-4"></i>
+              </button>
+              <button class="icon-btn topic-note" type="button" aria-label="Notiz" data-topic="${t.id}">
+                <i data-feather="file-text" class="w-4 h-4"></i>
+              </button>
+            </div>
+            ${quizBtn}
+          </div>
+          <a class="lg-open mt-auto topic-link" data-topic="${t.id}" href="${t.href}">
+            Öffnen <i data-feather="arrow-right" class="w-4 h-4"></i>
+          </a>
+        `;
+
+        grid.appendChild(card);
+
+        const tr = document.createElement('tr');
+        tr.className = 'searchable';
+        tr.dataset.id = t.id;
+        tr.dataset.keywords = t.keywords;
+        tr.dataset.search = `${t.title} ${t.desc} ${t.badge} ${t.keywords}`;
+        tr.innerHTML = `
+          <td><strong>${t.title}</strong><div class="text-white/60 text-xs mt-1">${t.badge}</div></td>
+          <td class="text-white/70 text-sm">${t.keywords}</td>
+          <td>
+            <a class="lg-btn inline-flex items-center gap-2" href="${t.href}" data-topic="${t.id}">
+              <i data-feather="arrow-right" class="w-4 h-4"></i><span>Öffnen</span>
+            </a>
+          </td>
+        `;
+        listBody.appendChild(tr);
+      }
+
+      syncFavButtons();
+      featherReplace();
+    }
+
+    function setView(mode){
+      const grid = $('#grid');
+      const listWrap = $('#listWrap');
+      const btnCards = $('#viewCards');
+      const btnList = $('#viewList');
+      if (!grid || !listWrap || !btnCards || !btnList) return;
+
+      const isCards = mode === 'cards';
+      grid.classList.toggle('hidden', !isCards);
+      listWrap.classList.toggle('hidden', isCards);
+      btnCards.setAttribute('aria-pressed', String(isCards));
+      btnList.setAttribute('aria-pressed', String(!isCards));
+      saveJSON('lc_view', mode);
+    }
+
+    /* =========================
+       Search: AND with space, OR with |
+    ========================= */
+    function normalizeText(s){
+      return (s || '')
+        .toLowerCase()
+        .replace(/ß/g,'ss')
+        .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+        .replace(/á|à|â|ã|å/g,'a').replace(/é|è|ê/g,'e').replace(/í|ì|î/g,'i')
+        .replace(/ó|ò|ô|õ/g,'o').replace(/ú|ù|û/g,'u');
+    }
+
+    function parseQuery(q){
+      const raw0 = (q || '').trim();
+      const raw = normalizeText(raw0);
+      if (!raw) return { and: [], orGroups: [], not: [] };
+
+      const tokens = (str) => str.split(/\s+/).filter(Boolean);
+      const splitGroup = (str) => {
+        const inc = []; const not = [];
+        for (const t of tokens(str)){
+          if (t.startsWith('-') && t.length > 1) not.push(t.slice(1));
+          else inc.push(t);
+        }
+        return { inc, not };
+      };
+
+      if (raw.includes('|')){
+        const parts = raw.split('|').map(s => s.trim()).filter(Boolean);
+        const orGroups = [];
+        const notAll = [];
+        for (const p of parts){
+          const g = splitGroup(p);
+          if (g.inc.length) orGroups.push(g.inc);
+          notAll.push(...g.not);
+        }
+        return { and: [], orGroups, not: Array.from(new Set(notAll)) };
+      }
+
+      const g = splitGroup(raw);
+      return { and: g.inc, orGroups: [], not: g.not };
+    }
+
+    function matchKeywords(text, parsed){
+      const hay = normalizeText(text || '');
+      if (parsed.not?.length && parsed.not.some(w => hay.includes(w))) return false;
+
+      if (parsed.orGroups.length){
+        return parsed.orGroups.some(group => group.every(w => hay.includes(w)));
+      }
+      return parsed.and.every(w => hay.includes(w));
+    }
+
+    function applySearch(){
+      const q = ($('#q')?.value || '').trim();
+      const parsed = parseQuery(q);
+
+      const items = $$('.searchable');
+      for (const el of items){
+        const hay = el.dataset.search || el.dataset.keywords || '';
+        const ok = !q || matchKeywords(hay, parsed);
+        el.classList.toggle('hidden', !ok);
+      }
+
+      updateRecentSearch(q);
+    }
+
+    function buildSuggestChips(){
+      const chips = [
+        'reifen dot','reifen|felgen','drehmoment','sturz','spur','nachlauf','spreizung','lenkung','lenkgetriebe','lenktrapez','servolenkung',
+        'db(a)','abs','druck kraft','einpresstiefe','lochkreis','reifen -dot'
+      ];
+      const wrap = $('#suggestChips');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      for (const c of chips){
+        const b = document.createElement('span');
+        b.className = 'chip';
+        b.textContent = c;
+        b.addEventListener('click', () => {
+          $('#q').value = c;
+          applySearch();
+        });
+        wrap.appendChild(b);
+      }
+    }
+
+    function updateRecentSearch(q){
+      const row = $('#recentSearchRow');
+      const wrap = $('#recentSearchChips');
+      if (!row || !wrap) return;
+
+      if (!q){
+        row.classList.add('hidden');
+        return;
+      }
+      let list = loadJSON(LS.recentSearch, []);
+      list = [q, ...list.filter(x => x !== q)].slice(0,6);
+      saveJSON(LS.recentSearch, list);
+
+      wrap.innerHTML = '';
+      for (const item of list){
+        const b = document.createElement('span');
+        b.className = 'chip';
+        b.textContent = item;
+        b.addEventListener('click', () => {
+          $('#q').value = item;
+          applySearch();
+        });
+        wrap.appendChild(b);
+      }
+      row.classList.remove('hidden');
+    }
+
+    function loadRecentSearch(){
+      const list = loadJSON(LS.recentSearch, []);
+      if (!list.length) return;
+      const row = $('#recentSearchRow');
+      const wrap = $('#recentSearchChips');
+      if (!row || !wrap) return;
+
+      wrap.innerHTML = '';
+      for (const item of list){
+        const b = document.createElement('span');
+        b.className = 'chip';
+        b.textContent = item;
+        b.addEventListener('click', () => {
+          $('#q').value = item;
+          applySearch();
+        });
+        wrap.appendChild(b);
+      }
+      row.classList.remove('hidden');
+    }
+
+    /* =========================
+       Favorites UI
+    ========================= */
+    function syncFavButtons(){
+      const fav = getFavorites();
+      $$('.topic-fav').forEach(btn => {
+        const id = btn.dataset.topic;
+        const on = fav.has(id);
+        btn.classList.toggle('fav-on', on);
+      });
+      renderFavChips();
+    }
+
+    function renderFavChips(){
+      const wrap = $('#favChips');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      const fav = getFavorites();
+      const topics = getTopics();
+
+      for (const id of fav){
+        const t = topics.find(x => x.id === id);
+        if (!t) continue;
+        const c = document.createElement('span');
+        c.className = 'chip';
+        c.innerHTML = `<i data-feather="star" class="w-3.5 h-3.5"></i><span>${t.title}</span>`;
+        c.addEventListener('click', () => {
+          const el = document.querySelector(`[data-id="${id}"]`);
+          if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+        });
+        wrap.appendChild(c);
+      }
+      if (!fav.size){
+        const empty = document.createElement('div');
+        empty.className = 'text-white/60 text-sm';
+        empty.textContent = 'Noch keine Favoriten.';
+        wrap.appendChild(empty);
+      }
+      featherReplace();
+    }
+
+    /* =========================
+       Topic Notes
+    ========================= */
+    let currentNoteTopic = null;
+    function openNote(topicId){
+      currentNoteTopic = topicId;
+      const topics = getTopics();
+      const t = topics.find(x => x.id === topicId);
+      const map = getTopicNotes();
+      $('#noteTitle').textContent = t ? t.title : 'Notiz';
+      $('#noteText').value = map[topicId] || '';
+      $('#noteModal').classList.remove('hidden');
+      featherReplace();
+    }
+    function closeNote(){
+      $('#noteModal').classList.add('hidden');
+      currentNoteTopic = null;
+    }
+    function saveNote(){
+      if (!currentNoteTopic) return closeNote();
+      const map = getTopicNotes();
+      map[currentNoteTopic] = $('#noteText').value || '';
+      setTopicNotes(map);
+      closeNote();
+    }
+
+    /* =========================
+       Notes Modal (global)
+    ========================= */
+    function openNotes(){
+      $('#notesBig').value = localStorage.getItem(LS.globalNotes) || '';
+      $('#notesModal').classList.remove('hidden');
+      featherReplace();
+    }
+    function closeNotes(){
+      $('#notesModal').classList.add('hidden');
+    }
+
+    function exportNotesTxt(){
+      const txt = $('#notesBig').value || '';
+      const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'LearnCraft_Notizen.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    /* =========================
+       Quick actions: Continue & Due
+    ========================= */
+    function updateContinueUI(){
+      const last = localStorage.getItem(LS.lastTopic);
+      const btn = $('#continueBtn');
+      const title = $('#continueTitle');
+      const meta = $('#continueMeta');
+      if (!btn || !title || !meta) return;
+
+      if (!last){
+        btn.disabled = true;
+        btn.style.opacity = .6;
+        title.textContent = 'Noch nichts geöffnet';
+        meta.textContent = 'Öffne ein Thema, dann merkt es sich das.';
+        return;
+      }
+      const t = getTopics().find(x => x.id === last);
+      btn.disabled = false;
+      btn.style.opacity = 1;
+      title.textContent = t ? t.title : last;
+      const ts = getTopicStats()[last];
+      const when = ts?.last ? new Date(ts.last).toLocaleString('de-CH', {weekday:'short', hour:'2-digit', minute:'2-digit'}) : '–';
+      meta.textContent = `Zuletzt: ${when}`;
+    }
+
+    function updateDueUI(){
+      const listEl = $('#dueList');
+      const countEl = $('#dueCount');
+      if (!listEl || !countEl) return;
+
+      const tstats = getTopicStats();
+      const topics = getTopics().filter(t => t.enabled);
+      const now = Date.now();
+
+      const due = topics
+        .map(t => {
+          const last = tstats[t.id]?.last || 0;
+          const days = Math.floor((now - last)/86400000);
+          return { id:t.id, title:t.title, days, last };
+        })
+        .filter(x => x.last && x.days >= 2)
+        .sort((a,b) => b.days - a.days)
+        .slice(0,6);
+
+      countEl.textContent = String(due.length);
+      listEl.innerHTML = '';
+      for (const d of due){
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between gap-2';
+        row.innerHTML = `<span>${d.title}</span><span class="text-white/60 text-xs mono">${d.days}d</span>`;
+        listEl.appendChild(row);
+      }
+      if (!due.length){
+        listEl.innerHTML = `<div class="text-white/60 text-sm">Heute nichts dringend.</div>`;
+      }
+    }
+
+    /* =========================
+       Stats UI render
+    ========================= */
+    let activeTab = 'opens';
+
+    function getLastNDays(n){
+      const out = [];
+      const now = new Date();
+      for (let i=n-1;i>=0;i--){
+        const d = new Date(now);
+        d.setDate(now.getDate()-i);
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const da = String(d.getDate()).padStart(2,'0');
+        out.push(`${y}-${m}-${da}`);
+      }
+      return out;
+    }
+
+    function computeActiveDays(dstats, days){
+      return days.filter(k => (dstats[k]?.opens || 0) > 0).length;
+    }
+
+    function computeStreakFromDaily(dstats){
+      const days = getLastNDays(120);
+      let streak = 0;
+      for (let i=days.length-1;i>=0;i--){
+        const k = days[i];
+        if ((dstats[k]?.opens || 0) > 0) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    function updateStatsUI(){
+      const tstats = getTopicStats();
+      const dstats = getDailyStats();
+      const days = getLastNDays(30);
+
+      const topicsOpened = Object.keys(tstats).length;
+      const activeDays = computeActiveDays(dstats, days);
+      const streak = computeStreakFromDaily(dstats);
+      const totalMinutes = parseInt(localStorage.getItem(LS.minutes) || '0', 10);
+
+      $('#kpiTopics').textContent = String(topicsOpened);
+      $('#kpiDays').textContent = String(activeDays);
+      $('#kpiStreak').textContent = String(streak);
+      $('#kpiMinutes').textContent = String(totalMinutes);
+
+      const today = todayKey();
+      const todayOpens = dstats[today]?.opens || 0;
+      $('#todayCount').textContent = String(todayOpens);
+      const pct = clamp((todayOpens/6)*100, 0, 100);
+      $('#todayBar').style.width = pct.toFixed(0) + '%';
+
+      renderHeatmap(days, dstats);
+      renderTrend(days, dstats);
+      renderTopTopics(tstats);
+    }
+
+    function renderHeatmap(days, dstats){
+      const wrap = $('#heatmap');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+
+      const max = Math.max(1, ...days.map(k => (dstats[k]?.opens||0)));
+      for (const k of days){
+        const v = (dstats[k]?.opens||0);
+        let lvl = 0;
+        if (v===0) lvl=0;
+        else if (v <= max*0.33) lvl=1;
+        else if (v <= max*0.66) lvl=2;
+        else lvl=3;
+
+        const cell = document.createElement('div');
+        cell.className = 'hm-cell';
+        cell.dataset.lvl = String(lvl);
+        cell.dataset.tip = `${k} · ${v} Öffnungen`;
+        cell.style.background = `radial-gradient(circle at 30% 30%, rgba(56,189,248,${0.10 + 0.18*lvl}), rgba(56,189,248,0.02))`;
+        wrap.appendChild(cell);
+      }
+    }
+
+    function renderTrend(days, dstats){
+      const c = $('#trend');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const w = c.clientWidth;
+      const h = c.height;
+
+      c.width = Math.floor(w * dpr);
+      c.height = Math.floor(h * dpr);
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.scale(dpr, dpr);
+
+      const vals = days.map(k => {
+        if (activeTab === 'opens') return dstats[k]?.opens || 0;
+        if (activeTab === 'minutes') return dstats[k]?.minutes || 0;
+        if (activeTab === 'quiz') return dstats[k]?.quiz || 0;
+        return 0;
+      });
+      const max = Math.max(1, ...vals);
+
+      ctx.clearRect(0,0,w,h);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.78)';
+      ctx.fillStyle = 'rgba(56,189,248,0.12)';
+
+      const pad = 10;
+      const innerW = w - pad*2;
+      const innerH = h - pad*2;
+
+      ctx.beginPath();
+      vals.forEach((v,i) => {
+        const x = pad + (i/(vals.length-1)) * innerW;
+        const y = pad + innerH - (v/max) * innerH;
+        if (i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+
+      ctx.lineTo(pad + innerW, pad + innerH);
+      ctx.lineTo(pad, pad + innerH);
+      ctx.closePath();
+      ctx.fill();
+
+      // grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+      ctx.lineWidth = 1;
+      for (let i=0;i<=4;i++){
+        const y = pad + (i/4)*innerH;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(pad+innerW, y);
+        ctx.stroke();
+      }
+    }
+
+    function renderTopTopics(tstats){
+      const wrap = $('#topTopics');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      const topics = getTopics();
+
+      const arr = Object.entries(tstats)
+        .map(([id, st]) => ({ id, opens: st.opens||0, minutes: st.minutes||0, last: st.last||0 }))
+        .sort((a,b) => b.opens - a.opens)
+        .slice(0,6);
+
+      for (const it of arr){
+        const t = topics.find(x => x.id === it.id);
+        if (!t) continue;
+
+        const box = document.createElement('div');
+        box.className = 'liquid-glass lg-chip lg-radius-xl p-4 border border-white/10';
+        const last = it.last ? new Date(it.last).toLocaleDateString('de-CH',{weekday:'short', day:'2-digit', month:'2-digit'}) : '–';
+        box.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-white/60 text-xs uppercase tracking-wide">${t.badge}</div>
+              <div class="text-white/90 font-extrabold">${t.title}</div>
+              <div class="text-white/60 text-xs mt-1">Letztes Mal: ${last}</div>
+            </div>
+            <span class="liquid-glass lg-chip lg-radius-pill px-2 py-0.5 text-[11px] text-white/70 border border-white/10 mono">${it.opens}×</span>
+          </div>
+          <div class="mt-3 text-white/70 text-sm">Minuten: <span class="mono">${it.minutes}</span></div>
+          <div class="bar mt-2"><div style="width:${clamp((it.opens/10)*100,0,100)}%"></div></div>
+        `;
+        wrap.appendChild(box);
+      }
+      if (!arr.length){
+        wrap.innerHTML = `<div class="text-white/60 text-sm">Noch keine Daten. Öffne Themen, dann wirkt das Ganze weniger leer.</div>`;
+      }
+    }
+
+    /* =========================
+       Tips
+    ========================= */
+    const DEFAULT_TIPS = [
+      {title:'Bremsen: zuerst Sicht, dann Messung', text:'Erst Leck/Belag/Scheibe checken. Dann Messuhr/Belagstärke. Dokumentieren.'},
+      {title:'Drehmomente: immer nach Tabelle', text:'Nicht “nach Gefühl”. Gewinde sauber, ggf. leicht ölen wie Vorgabe.'},
+      {title:'Reifen: DOT + Zustand', text:'DOT lesen, Risse/Beulen, Profiltiefe, Luftdruck. Das rettet Leben und Nerven.'},
+      {title:'Achsgeometrie: Symptom → Winkel', text:'Zieht nach rechts? Reifen außen blank? Denk: Spur/Sturz/Nachlauf.'}
+    ];
+
+    function getTips(){
+      const v = loadJSON(LS.tips, null);
+      return v && Array.isArray(v) ? v : DEFAULT_TIPS.slice();
+    }
+    function setTips(v){ saveJSON(LS.tips, v); }
+
+    function renderTips(){
+      const list = $('#tipsList');
+      if (!list) return;
+      const tips = getTips();
+      list.innerHTML = '';
+      tips.forEach((t, idx) => {
+        const row = document.createElement('div');
+        row.className = 'liquid-glass lg-chip lg-radius-xl p-4 border border-white/10';
+        row.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-white/90 font-extrabold">${t.title}</div>
+              <div class="text-white/75 text-sm mt-1">${t.text}</div>
+            </div>
+            <button class="icon-btn tipDel" data-idx="${idx}" type="button" aria-label="Löschen">
+              <i data-feather="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+
+      $$('.tipDel').forEach(b => {
+        b.addEventListener('click', () => {
+          const idx = parseInt(b.dataset.idx, 10);
+          const tips = getTips();
+          tips.splice(idx,1);
+          setTips(tips);
+          renderTips();
+          featherReplace();
+        });
+      });
+      featherReplace();
+    }
+
+    function addTip(){
+      const title = prompt('Titel für Tipp?');
+      if (!title) return;
+      const text = prompt('Tipp-Text?') || '';
+      const tips = getTips();
+      tips.unshift({title, text});
+      setTips(tips);
+      renderTips();
+    }
+
+    /* =========================
+       Topic Manager
+    ========================= */
+    function openTopicManager(){
+      const wrap = $('#topicManagerList');
+      wrap.innerHTML = '';
+      const topics = getTopics();
+
+      const enabledMap = loadJSON(LS.topicsEnabled, {});
+      topics.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between gap-3 py-2 border-b border-white/10';
+        row.innerHTML = `
+          <div>
+            <div class="text-white/90 font-extrabold">${t.title}</div>
+            <div class="text-white/60 text-xs">${t.badge}</div>
+          </div>
+          <label class="flex items-center gap-2 text-white/70 text-sm">
+            <input type="checkbox" class="accent-sky-400 tm" data-id="${t.id}" ${t.enabled ? 'checked' : ''}>
+            <span>Aktiv</span>
+          </label>
+        `;
+        wrap.appendChild(row);
+      });
+
+      $$('.tm', wrap).forEach(ch => {
+        ch.addEventListener('change', () => {
+          enabledMap[ch.dataset.id] = ch.checked;
+          saveJSON(LS.topicsEnabled, enabledMap);
+          renderTopics();
+          applySearch();
+          updateDueUI();
+        });
+      });
+
+      $('#topicManager').classList.remove('hidden');
+      featherReplace();
+    }
+    function closeTopicManager(){ $('#topicManager').classList.add('hidden'); }
+
+    function enableDisableAll(val){
+      const topics = getTopics();
+      const enabledMap = loadJSON(LS.topicsEnabled, {});
+      topics.forEach(t => enabledMap[t.id] = val);
+      saveJSON(LS.topicsEnabled, enabledMap);
+      renderTopics();
+      applySearch();
+      updateDueUI();
+      openTopicManager();
+    }
+
+    /* =========================
+       Sessions tracking (light)
+    ========================= */
+    let sessionTopic = null;
+    let sessionStart = null;
+
+    function startSession(topicId){
+      sessionTopic = topicId;
+      sessionStart = Date.now();
+    }
+
+    function endSession(){
+      if (!sessionTopic || !sessionStart) return;
+      const end = Date.now();
+      const durMin = Math.max(1, Math.round((end - sessionStart)/60000));
+      addMinutes(sessionTopic, durMin);
+
+      const sessions = getSessions();
+      sessions.unshift({
+        topic: sessionTopic,
+        start: sessionStart,
+        end,
+        minutes: durMin
+      });
+      setSessions(sessions.slice(0, 200));
+
+      sessionTopic = null;
+      sessionStart = null;
+      updateStatsUI();
+    }
+
+    function openSessions(){
+      const sessions = getSessions();
+      const body = $('#sessionsBody');
+      body.innerHTML = '';
+      const topics = getTopics();
+
+      sessions.slice(0, 60).forEach(s => {
+        const t = topics.find(x => x.id === s.topic);
+        const d = new Date(s.start);
+        const date = d.toLocaleDateString('de-CH', {year:'numeric', month:'2-digit', day:'2-digit'});
+        const st = new Date(s.start).toLocaleTimeString('de-CH', {hour:'2-digit', minute:'2-digit'});
+        const en = new Date(s.end).toLocaleTimeString('de-CH', {hour:'2-digit', minute:'2-digit'});
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${st}</td>
+          <td>${en}</td>
+          <td class="mono">${s.minutes}m</td>
+          <td>${t ? t.title : s.topic}</td>
+        `;
+        body.appendChild(tr);
+      });
+
+      $('#sessionsModal').classList.remove('hidden');
+      featherReplace();
+    }
+    function closeSessions(){ $('#sessionsModal').classList.add('hidden'); }
+
+    /* =========================
+       Quiz
+    ========================= */
+    const QUIZ = {
+      deck: [],
+      idx: 0,
+      correct: 0,
+      wrong: 0,
+      timerOn: false,
+      timerLeft: 45,
+      timerId: null
+    };
+
+    function getQuizStats(){ return loadJSON(LS.quizStats, { correct:0, wrong:0 }); }
+    function setQuizStats(v){ saveJSON(LS.quizStats, v); }
+
+    let quizSelected = new Set(loadJSON(LS.quizSelected, []));
+    function setQuizSelected(set){
+      quizSelected = set;
+      saveJSON(LS.quizSelected, Array.from(set));
+    }
+
+    function openQuiz(prefSelectIds=null){
+      const topics = getTopics().filter(t => t.enabled && t.quiz && t.quiz.length);
+      const wrap = $('#quizTopics');
+      wrap.innerHTML = '';
+
+      let selected = new Set(quizSelected);
+      if (prefSelectIds && prefSelectIds.length){
+        selected = new Set(prefSelectIds);
+      } else if (!selected.size){
+        topics.forEach(t => selected.add(t.id));
+      }
+      setQuizSelected(selected);
+
+      topics.forEach(t => {
+        const c = document.createElement('span');
+        c.className = 'chip';
+        c.dataset.id = t.id;
+        c.innerHTML = `<i data-feather="bookmark" class="w-3.5 h-3.5"></i><span>${t.title}</span>`;
+        c.style.opacity = selected.has(t.id) ? '1' : '.45';
+        c.addEventListener('click', () => {
+          if (selected.has(t.id)) selected.delete(t.id);
+          else selected.add(t.id);
+          setQuizSelected(selected);
+          c.style.opacity = selected.has(t.id) ? '1' : '.45';
+        });
+        wrap.appendChild(c);
+      });
+
+      $('#quizModal').classList.remove('hidden');
+      featherReplace();
+    }
+
+    function closeQuiz(){
+      $('#quizModal').classList.add('hidden');
+      stopQuizTimer();
+    }
+
+    function buildDeck(){
+      const topics = getTopics().filter(t => t.enabled && t.quiz && t.quiz.length);
+      const onlyFav = $('#quizOnlyFav').checked;
+      const fav = getFavorites();
+      const selected = quizSelected.size ? quizSelected : new Set(topics.map(t => t.id));
+
+      let questions = [];
+      for (const t of topics){
+        if (!selected.has(t.id)) continue;
+        if (onlyFav && !fav.has(t.id)) continue;
+        (t.quiz || []).forEach(q => {
+          questions.push({ ...q, topicId: t.id, topicTitle: t.title });
+        });
+      }
+      const shuffle = $('#quizShuffle').checked;
+      if (shuffle){
+        questions = questions
+          .map(v => ({v, r: Math.random()}))
+          .sort((a,b)=>a.r-b.r)
+          .map(x=>x.v);
+      }
+      return questions;
+    }
+
+    function startQuiz(){
+      QUIZ.deck = buildDeck();
+      QUIZ.idx = 0;
+      QUIZ.correct = 0;
+      QUIZ.wrong = 0;
+
+      $('#quizCorrect').textContent = '0';
+      $('#quizWrong').textContent = '0';
+      $('#quizTotal').textContent = String(QUIZ.deck.length);
+      $('#quizFeedback').textContent = '';
+
+      if (!QUIZ.deck.length){
+        $('#quizQ').textContent = 'Keine Fragen (Auswahl leer).';
+        $('#quizAnswers').innerHTML = '';
+        return;
+      }
+      showQuizQuestion();
+    }
+
+    function showQuizQuestion(){
+      stopQuizTimer();
+
+      const q = QUIZ.deck[QUIZ.idx];
+      $('#quizIdx').textContent = String(QUIZ.idx+1);
+      $('#quizQ').textContent = q.q;
+
+      const wrap = $('#quizAnswers');
+      wrap.innerHTML = '';
+      q.a.forEach((ans, i) => {
+        const b = document.createElement('button');
+        b.className = 'lg-btn justify-center w-full';
+        b.type = 'button';
+        b.textContent = ans;
+        b.addEventListener('click', () => answerQuiz(i));
+        wrap.appendChild(b);
+      });
+
+      const timerOn = $('#quizTimer').checked;
+      $('#quizTime').classList.toggle('hidden', !timerOn);
+      if (timerOn){
+        QUIZ.timerOn = true;
+        QUIZ.timerLeft = 45;
+        $('#quizTime').textContent = String(QUIZ.timerLeft);
+        QUIZ.timerId = setInterval(() => {
+          QUIZ.timerLeft -= 1;
+          $('#quizTime').textContent = String(QUIZ.timerLeft);
+          if (QUIZ.timerLeft <= 0){
+            stopQuizTimer();
+            answerQuiz(-1);
+          }
+        }, 1000);
+      } else {
+        QUIZ.timerOn = false;
+      }
+    }
+
+    function stopQuizTimer(){
+      if (QUIZ.timerId){
+        clearInterval(QUIZ.timerId);
+        QUIZ.timerId = null;
+      }
+    }
+
+    function answerQuiz(choice){
+      const q = QUIZ.deck[QUIZ.idx];
+      const correct = choice === q.c;
+
+      const dstats = getDailyStats();
+      const dk = todayKey();
+      dstats[dk] = dstats[dk] || { opens:0, minutes:0, quiz:0 };
+      dstats[dk].quiz += 1;
+      setDailyStats(dstats);
+
+      const qs = getQuizStats();
+      if (correct){
+        QUIZ.correct++;
+        qs.correct += 1;
+        $('#quizFeedback').textContent = `✅ Richtig · ${q.topicTitle}`;
+      } else {
+        QUIZ.wrong++;
+        qs.wrong += 1;
+        const right = q.a[q.c];
+        $('#quizFeedback').textContent = `❌ Falsch · richtig wäre: ${right} · ${q.topicTitle}`;
+      }
+      setQuizStats(qs);
+
+      $('#quizCorrect').textContent = String(QUIZ.correct);
+      $('#quizWrong').textContent = String(QUIZ.wrong);
+
+      QUIZ.idx++;
+      if (QUIZ.idx >= QUIZ.deck.length){
+        $('#quizQ').textContent = 'Fertig.';
+        $('#quizAnswers').innerHTML = '';
+        $('#quizIdx').textContent = String(QUIZ.deck.length);
+        stopQuizTimer();
+        updateStatsUI();
+        return;
+      }
+      showQuizQuestion();
+      updateStatsUI();
+    }
+
+    function skipQuiz(){
+      QUIZ.idx++;
+      if (QUIZ.idx >= QUIZ.deck.length){
+        $('#quizQ').textContent = 'Fertig.';
+        $('#quizAnswers').innerHTML = '';
+        stopQuizTimer();
+        updateStatsUI();
+        return;
+      }
+      showQuizQuestion();
+    }
+
+    function endQuiz(){
+      $('#quizQ').textContent = 'Beendet.';
+      $('#quizAnswers').innerHTML = '';
+      stopQuizTimer();
+      updateStatsUI();
+    }
+
+    /* =========================
+       Wire UI events
+    ========================= */
+    function wireUI(){
+      // search
+      $('#q').addEventListener('input', applySearch);
+
+      // view switch
+      $('#viewCards').addEventListener('click', () => setView('cards'));
+      $('#viewList').addEventListener('click', () => setView('list'));
+
+      // topic open tracking
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('.topic-link, a.lg-btn[href], .topic-link *');
+        const a = e.target.closest('a[data-topic], .topic-link');
+        if (a && a.dataset.topic){
+          trackOpen(a.dataset.topic);
+          startSession(a.dataset.topic);
+        }
+      });
+
+      // favorites buttons
+      document.addEventListener('click', (e) => {
+        const b = e.target.closest('.topic-fav');
+        if (!b) return;
+        const id = b.dataset.topic;
+        const fav = getFavorites();
+        if (fav.has(id)) fav.delete(id); else fav.add(id);
+        setFavorites(fav);
+        syncFavButtons();
+      });
+
+      // notes buttons
+      document.addEventListener('click', (e) => {
+        const b = e.target.closest('.topic-note');
+        if (!b) return;
+        openNote(b.dataset.topic);
+      });
+
+      // topic quiz button
+      document.addEventListener('click', (e) => {
+        const b = e.target.closest('.topic-quiz');
+        if (!b) return;
+        const id = b.dataset.topic;
+        openQuiz([id]);
+      });
+
+      // continue
+      $('#continueBtn').addEventListener('click', () => {
+        const last = localStorage.getItem(LS.lastTopic);
+        if (!last) return;
+        const el = document.querySelector(`[data-id="${last}"]`);
+        if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+
+      // due jump
+      $('#jumpDue').addEventListener('click', () => {
+        const list = $('#dueList');
+        if (list) list.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+
+      // topic manager
+      $('#openTopicManager').addEventListener('click', openTopicManager);
+      $('#closeTopicManager').addEventListener('click', closeTopicManager);
+      $('#topicManager').addEventListener('click', (e) => { if (e.target.id === 'topicManager') closeTopicManager(); });
+      $('#enableAll').addEventListener('click', () => enableDisableAll(true));
+      $('#disableAll').addEventListener('click', () => enableDisableAll(false));
+
+      // notes modal
+      $('#openNotes').addEventListener('click', openNotes);
+      $('#closeNotes').addEventListener('click', closeNotes);
+      $('#notesModal').addEventListener('click', (e) => { if (e.target.id === 'notesModal') closeNotes(); });
+      $('#saveNotesBig').addEventListener('click', () => {
+        localStorage.setItem(LS.globalNotes, $('#notesBig').value || '');
+        closeNotes();
+      });
+      $('#exportNotes').addEventListener('click', exportNotesTxt);
+
+      // per-topic note modal
+      $('#closeNote').addEventListener('click', closeNote);
+      $('#saveNote').addEventListener('click', saveNote);
+      $('#noteModal').addEventListener('click', (e) => { if (e.target.id === 'noteModal') closeNote(); });
+
+      // quiz
+      $('#openQuizTop').addEventListener('click', () => openQuiz(null));
+      $('#openQuizHero').addEventListener('click', () => openQuiz(null));
+      $('#openQuizBottom').addEventListener('click', () => openQuiz(null));
+      $('#closeQuiz').addEventListener('click', closeQuiz);
+      $('#quizModal').addEventListener('click', (e) => { if (e.target.id === 'quizModal') closeQuiz(); });
+      $('#startQuiz').addEventListener('click', startQuiz);
+      $('#quizSkip').addEventListener('click', skipQuiz);
+      $('#quizEnd').addEventListener('click', endQuiz);
+
+      // stats tabs
+      $$('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          $$('.tab-btn').forEach(b => b.setAttribute('aria-selected','false'));
+          btn.setAttribute('aria-selected','true');
+          activeTab = btn.dataset.tab;
+          updateStatsUI();
+        });
+      });
+
+      // theme toggle
+      $('#themeToggle').addEventListener('click', () => {
+        const cur = document.documentElement.dataset.theme || 'dark';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
+      });
+
+      // reset stats
+      $('#resetStats').addEventListener('click', () => {
+        if (!confirm('Wirklich ALLE Stats löschen?')) return;
+        localStorage.removeItem(LS.topicStats);
+        localStorage.removeItem(LS.dailyStats);
+        localStorage.removeItem(LS.minutes);
+        localStorage.removeItem(LS.streak);
+        localStorage.removeItem(LS.lastDay);
+        localStorage.removeItem(LS.sessions);
+        updateStatsUI();
+        updateDueUI();
+        updateContinueUI();
+      });
+
+      // sessions modal
+      $('#openSessions').addEventListener('click', openSessions);
+      $('#closeSessions').addEventListener('click', closeSessions);
+      $('#sessionsModal').addEventListener('click', (e) => { if (e.target.id === 'sessionsModal') closeSessions(); });
+
+      // tips
+      $('#addTip').addEventListener('click', addTip);
+
+      // copy IG
+      $('#copyIg').addEventListener('click', async () => {
+        try{
+          await navigator.clipboard.writeText('@demir.wsx');
+          $('#copyToast').classList.remove('hidden');
+          setTimeout(() => $('#copyToast').classList.add('hidden'), 1200);
+        }catch(e){}
+      });
+
+      // fav hint
+      $('#favHint').addEventListener('click', () => alert('Favoriten: Klick auf den Stern in einer Karte.'));
+
+      // persist notes
+      const gn = $('#globalNotes');
+      if (gn){
+        gn.value = localStorage.getItem(LS.globalNotes) || '';
+        gn.addEventListener('input', () => localStorage.setItem(LS.globalNotes, gn.value || ''));
+      }
+      const tn = $('#tipsNotes');
+      if (tn){
+        tn.value = localStorage.getItem(LS.tipsNotes) || '';
+        tn.addEventListener('input', () => localStorage.setItem(LS.tipsNotes, tn.value || ''));
+      }
+
+      // stop session on leaving page
+      window.addEventListener('beforeunload', endSession);
+
+      // When user clicks different topic link, end last session and start new
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a[data-topic], .topic-link');
+        if (a && a.dataset.topic){
+          endSession();
+          startSession(a.dataset.topic);
+        }
+      });
+    }
+
+    /* =========================
+       Learning minutes tracker (basic)
+    ========================= */
+    function startMinuteTracker(){
+      setInterval(() => {
+        const topic = localStorage.getItem(LS.lastTopic);
+        if (!topic) return;
+        addMinutes(topic, 1);
+        updateStatsUI();
+      }, 60000);
+    }
+
+    /* =========================
+       Init
+    ========================= */
+    function init(){
+      // theme
+      const theme = localStorage.getItem(LS.theme) || 'dark';
+      applyTheme(theme);
+
+      featherReplace();
+      setupTime();
+      setupWeather();
+      setupHeroScroll();
+
+      buildSuggestChips();
+      loadRecentSearch();
+
+      renderTopics();
+      renderTips();
+
+      // view restore
+      const view = loadJSON('lc_view', 'cards');
+      setView(view);
+
+      // stats
+      updateStatsUI();
+      updateContinueUI();
+      updateDueUI();
+
+      // wire
+      wireUI();
+
+      // minute tracker
+      startMinuteTracker();
+
+      // when resizing, rerender trend to fit width
+      window.addEventListener('resize', () => updateStatsUI());
+
+      // Prevent errors if any icon replacement later
+      featherReplace();
+    }
+
+    // Safety net: don't let one bug kill the whole page
+    window.addEventListener('DOMContentLoaded', () => { try{ init(); } catch(e){ console.error(e); } });
+    // Falls Icons später reinkommen (dynamisch), nochmal ersetzen
+    window.addEventListener('load', () => featherReplace());
+  </script>
+</body>
+</html>
