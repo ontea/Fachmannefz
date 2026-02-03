@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChatPRO – Globaler Chat</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+  <!-- Ably (Frontend-only) -->
+  <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+
+  <style>
+    /* Light Mode Lesbarkeit */
+    [data-theme="light"] body { color: rgba(15,23,42,0.92); }
+    [data-theme="light"] .liquid-glass{
+      background: rgba(255,255,255,0.72) !important;
+      border-color: rgba(15,23,42,0.10) !important;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.10) !important;
+      color: rgba(15,23,42,0.92) !important;
+    }
+    [data-theme="light"] .text-white{ color: rgba(15,23,42,0.92) !important; }
+    [data-theme="light"] .text-white\/90{ color: rgba(15,23,42,0.90) !important; }
+    [data-theme="light"] .text-white\/80{ color: rgba(15,23,42,0.80) !important; }
+    [data-theme="light"] .text-white\/70{ color: rgba(15,23,42,0.70) !important; }
+    [data-theme="light"] .text-white\/60{ color: rgba(15,23,42,0.60) !important; }
+
+    [data-theme="light"] .bg-white\/5{ background: rgba(2,6,23,0.04) !important; }
+    [data-theme="light"] .border-white\/10{ border-color: rgba(15,23,42,0.14) !important; }
+    [data-theme="light"] .focus\:border-white\/20:focus{ border-color: rgba(15,23,42,0.22) !important; }
+    [data-theme="light"] .focus\:ring-white\/10:focus{ --tw-ring-color: rgba(2,6,23,0.10) !important; }
+
+    .calc-input{
+      width:100%;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    .calc-input:focus{
+      border-color: rgba(255,255,255,0.20);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+    }
+    [data-theme="light"] .calc-input{
+      background: rgba(2,6,23,0.04) !important;
+      color: rgba(15,23,42,0.92) !important;
+      border-color: rgba(15,23,42,0.14) !important;
+    }
+    [data-theme="light"] .calc-input:focus{
+      border-color: rgba(15,23,42,0.22) !important;
+      box-shadow: 0 0 0 3px rgba(2,6,23,0.08) !important;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+    }
+    [data-theme="light"] .pill{
+      border-color: rgba(15,23,42,0.12);
+      background: rgba(2,6,23,0.04);
+    }
+
+    /* Chat */
+    .chat-log{
+      height: 420px;
+      overflow: auto;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+    }
+    html[data-theme="light"] .chat-log{
+      background: rgba(2,6,23,0.03);
+      border-color: rgba(15,23,42,0.10);
+    }
+    .msg{
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      margin-bottom: 10px;
+    }
+    html[data-theme="light"] .msg{
+      background: rgba(255,255,255,0.72);
+      border-color: rgba(0,0,0,0.10);
+    }
+    .msg .meta{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size: 12px;
+      opacity: .88;
+      margin-bottom: 6px;
+    }
+    .msg .name{ font-weight: 800; }
+    .msg .time{ opacity: .7; font-variant-numeric: tabular-nums; }
+    .msg .text{ line-height: 1.35; word-wrap: break-word; white-space: pre-wrap; }
+    .msg .previews{ margin-top: 8px; display: grid; gap: 8px; }
+    .msg img.preview{
+      width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.10);
+    }
+    html[data-theme="light"] .msg img.preview{
+      border-color: rgba(15,23,42,0.12);
+      background: rgba(2,6,23,0.03);
+    }
+
+    a.chatlink{
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      opacity: .95;
+    }
+
+    .sys{
+      font-size: 12px;
+      opacity: .86;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 10px;
+    }
+    html[data-theme="light"] .sys{
+      border-color: rgba(15,23,42,0.18);
+      background: rgba(2,6,23,0.03);
+    }
+
+    @media (max-width: 520px){
+      .chat-log{ height: 380px; }
+    }
+  </style>
+</head>
+
+<body class="app">
+  <!-- SVG Filter -->
+  <svg class="svg-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="glass-distortion">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <main class="page-wrap">
+    <div class="max-w-4xl mx-auto p-5 pb-24">
+
+      <!-- Top widgets (ticks bleiben) -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-3 md:p-4 mb-5">
+        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="calendar" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Datum</p>
+              <div class="font-extrabold" id="date">–</div>
+            </div>
+          </div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="clock" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Zeit</p>
+              <div class="font-extrabold" id="time">–</div>
+            </div>
+          </div>
+
+          <div class="lg-divider"></div>
+
+          <div class="liquid-glass lg-chip lg-radius-md p-2.5 flex items-center gap-2.5">
+            <div class="lg-icon"><i data-feather="activity" class="w-4 h-4"></i></div>
+            <div>
+              <p class="lg-muted m-0">Status</p>
+              <div class="font-extrabold"><span id="connState">offline</span></div>
+            </div>
+          </div>
+
+          <div class="ml-auto flex gap-2">
+            <span class="pill text-xs text-white/60">
+              <i data-feather="hash" class="w-4 h-4"></i>
+              <span>1 Raum · global</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Header -->
+      <section class="flex items-center justify-between mb-3">
+        <h1 class="text-2xl sm:text-3xl font-bold">ChatPRO</h1>
+        <span class="pill text-xs text-white/60">
+          <i data-feather="link" class="w-4 h-4"></i>
+          <span>Links + Bilder + GIFs erlaubt</span>
+        </span>
+      </section>
+
+      <!-- Chat box -->
+      <section class="liquid-glass lg-surface lg-radius-xl p-4">
+        <!-- Connect row -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-2 mb-3">
+          <div class="md:col-span-3">
+            <label class="text-xs text-white/60">Nickname</label>
+            <input id="nick" class="calc-input mt-1" maxlength="18" placeholder="z.B. Andrej">
+          </div>
+
+          <div class="md:col-span-7">
+            <label class="text-xs text-white/60">Ably Key</label>
+            <input id="ablyKey" class="calc-input mt-1" placeholder="keyName:keySecret">
+          </div>
+
+          <div class="md:col-span-2 flex gap-2 md:flex-col md:justify-end">
+            <button id="connectBtn" class="lg-btn h-[44px] w-full" type="button">
+              <i data-feather="link" class="w-4 h-4"></i><span>Connect</span>
+            </button>
+            <button id="disconnectBtn" class="lg-btn h-[44px] w-full" type="button">
+              <i data-feather="x-circle" class="w-4 h-4"></i><span>Off</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- System line -->
+        <div id="sys" class="sys hidden"></div>
+
+        <!-- Log -->
+        <div id="chatLog" class="chat-log"></div>
+
+        <!-- Input -->
+        <div class="mt-3 flex gap-2">
+          <input id="msg" class="calc-input" maxlength="600" placeholder="Nachricht… (Links erlaubt)">
+          <button id="sendBtn" class="lg-btn" type="button" disabled>
+            <i data-feather="send" class="w-4 h-4"></i><span>Senden</span>
+          </button>
+        </div>
+
+        <div class="mt-2 flex flex-wrap gap-2 text-xs text-white/60">
+          <span class="pill"><i data-feather="check-circle" class="w-4 h-4"></i><span>Ticks bleiben: Datum/Zeit/Status</span></span>
+          <span class="pill"><i data-feather="zap" class="w-4 h-4"></i><span>Rate‑Limit: ~1 msg / 1.2s</span></span>
+          <span class="pill"><i data-feather="image" class="w-4 h-4"></i><span>Bild/GIF Preview bei Direktlink</span></span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Bottom Bar (minimal) -->
+  <nav id="bottomBar" class="liquid-glass bottom-bar lg-radius-pill" aria-label="Navigation">
+    <a class="bar-item" href="Index.html" aria-label="Home">
+      <i data-feather="home" class="bar-icon"></i>
+      <span class="bar-label">Home</span>
+    </a>
+
+    <a class="bar-item active" href="#" aria-label="Chat">
+      <i data-feather="message-circle" class="bar-icon"></i>
+      <span class="bar-label">Chat</span>
+    </a>
+
+    <button id="themeToggle" class="bar-item" type="button" aria-label="Theme wechseln">
+      <i id="themeIcon" data-feather="sun" class="bar-icon"></i>
+      <span class="bar-label">Theme</span>
+    </button>
+  </nav>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.feather) feather.replace();
+    });
+
+    // Theme toggle
+    (function themeInit(){
+      const html = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      function applyTheme(mode){
+        html.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+        if (icon) icon.setAttribute('data-feather', mode === 'dark' ? 'sun' : 'moon');
+        if (window.feather) feather.replace();
+      }
+
+      applyTheme(localStorage.getItem('theme') || 'dark');
+      btn?.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme') || 'dark';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+
+    // Date/Time
+    function updateDateTime() {
+      const now = new Date();
+      const d = document.getElementById('date');
+      const t = document.getElementById('time');
+      if (d) d.textContent = now.toLocaleDateString('de-CH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      if (t) t.textContent = now.toLocaleTimeString('de-CH');
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // ===== Chat (Ably) =====
+    // No rooms. One channel.
+    const CHANNEL = "global-chat";
+    const EVENT = "msg";
+
+    // Optional hardcode (otherwise user enters key once; stored locally)
+    const ABLY_KEY_HARDCODED = "xN-IIg.FUeKQw:k3v8se1pulMbcVjXxLaKan-JxKvcQT7hOW-_YBjrpkg"; // <- wenn du willst: hier rein
+
+    const nickEl = document.getElementById('nick');
+    const keyEl  = document.getElementById('ablyKey');
+    const msgEl  = document.getElementById('msg');
+    const logEl  = document.getElementById('chatLog');
+    const sysEl  = document.getElementById('sys');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const connState = document.getElementById('connState');
+
+    // restore
+    nickEl.value = localStorage.getItem('chatNick') || '';
+    keyEl.value  = localStorage.getItem('chatAblyKey') || '';
+
+    function esc(s){
+      return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+
+    function showSys(text){
+      sysEl.textContent = text;
+      sysEl.classList.remove('hidden');
+      setTimeout(()=>sysEl.classList.add('hidden'), 2200);
+      appendSys(text);
+    }
+
+    function appendSys(text){
+      const div = document.createElement('div');
+      div.className = 'sys';
+      div.textContent = text;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // very basic adult-domain/keyword block for LINKs only
+    const ADULT = [
+      "porn","porno","xxx","xvideos","pornhub","xhamster","xnxx","redtube",
+      "onlyfans","brazzers","hentai","nud","nude","sex","camgirl","escort"
+    ];
+    function looksAdult(url){
+      const u = url.toLowerCase();
+      return ADULT.some(k => u.includes(k));
+    }
+
+    // URL extraction
+    const URL_RE = /https?:\/\/[^\s<>"']+/gi;
+    const IMG_RE = /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i;
+
+    function renderTextWithLinks(text){
+      // escape first, then linkify safely
+      const safe = esc(text || "");
+      // We must re-find URLs on original text (not escaped)
+      const urls = (text || "").match(URL_RE) || [];
+      let out = safe;
+
+      // Replace URLs in a stable way: do a pass using a placeholder mapping
+      // We'll replace from end to avoid messing indices: use split approach
+      // Simplify: since we already escaped, just replace escaped URL strings if present.
+      // Works for normal URLs.
+      urls.forEach((u) => {
+        const eu = esc(u);
+        const a = `<a class="chatlink" href="${eu}" target="_blank" rel="noopener noreferrer">${eu}</a>`;
+        out = out.split(eu).join(a);
+      });
+      return out;
+    }
+
+    function buildPreviews(urls){
+      const previews = document.createElement('div');
+      previews.className = "previews";
+      let added = 0;
+
+      urls.forEach((u) => {
+        // Only preview direct image/gif links (keeps it simple)
+        if (IMG_RE.test(u) && !looksAdult(u)) {
+          const img = document.createElement('img');
+          img.className = "preview";
+          img.loading = "lazy";
+          img.alt = "preview";
+          img.src = u;
+          previews.appendChild(img);
+          added++;
+        }
+      });
+
+      return added ? previews : null;
+    }
+
+    function appendMsg(name, text, ts){
+      const div = document.createElement('div');
+      div.className = 'msg';
+      const time = ts ? new Date(ts).toLocaleTimeString('de-CH', {hour:'2-digit', minute:'2-digit'}) : '';
+      const urls = (text || "").match(URL_RE) || [];
+
+      div.innerHTML = `
+        <div class="meta">
+          <span class="name">${esc(name || 'anon')}</span>
+          <span class="time">${esc(time)}</span>
+        </div>
+        <div class="text">${renderTextWithLinks(text || "")}</div>
+      `;
+
+      const preview = buildPreviews(urls);
+      if (preview) div.appendChild(preview);
+
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setState(s){
+      connState.textContent = s;
+    }
+
+    function canUseKey(k){
+      return typeof k === 'string' && k.includes(':') && k.trim().length > 10;
+    }
+    function getKey(){
+      const typed = (keyEl.value || '').trim();
+      if (canUseKey(typed)) return typed;
+      const stored = (localStorage.getItem('chatAblyKey') || '').trim();
+      if (canUseKey(stored)) return stored;
+      if (canUseKey(ABLY_KEY_HARDCODED)) return ABLY_KEY_HARDCODED.trim();
+      return '';
+    }
+
+    let ably = null;
+    let channel = null;
+    let lastSent = 0;
+
+    function connect(){
+      if (ably) return;
+
+      const nick = (nickEl.value || 'anon').trim().slice(0,18) || 'anon';
+      localStorage.setItem('chatNick', nick);
+
+      const key = getKey();
+      if (!key){
+        showSys("Kein Ably Key gesetzt.");
+        return;
+      }
+      // store typed key locally
+      localStorage.setItem('chatAblyKey', key);
+
+      setState('verbinden…');
+      ably = new Ably.Realtime({ key, clientId: nick });
+
+      ably.connection.on((stateChange) => {
+        setState(stateChange.current);
+        if (stateChange.current === 'connected'){
+          sendBtn.disabled = false;
+          showSys("Verbunden als " + nick);
+        }
+        if (stateChange.current === 'failed'){
+          sendBtn.disabled = true;
+          showSys("Verbindung fehlgeschlagen. Key/Capabilities prüfen.");
+        }
+      });
+
+      channel = ably.channels.get(CHANNEL);
+      channel.subscribe(EVENT, (m) => {
+        const d = m.data || {};
+        appendMsg(d.n || 'anon', d.t || '', d.ts || Date.now());
+      });
+    }
+
+    function disconnect(){
+      try{
+        sendBtn.disabled = true;
+        if (channel) channel.unsubscribe();
+        channel = null;
+        if (ably){
+          ably.close();
+          ably = null;
+        }
+      }catch(e){}
+      setState('offline');
+      showSys("Getrennt.");
+    }
+
+    function send(){
+      if (!channel){ showSys("Nicht verbunden."); return; }
+
+      const now = Date.now();
+      if (now - lastSent < 1200) return;
+      lastSent = now;
+
+      const nick = (nickEl.value || 'anon').trim().slice(0,18) || 'anon';
+      const text = (msgEl.value || '').trim().slice(0, 600);
+      if (!text) return;
+
+      // link filter (adult only)
+      const urls = text.match(URL_RE) || [];
+      if (urls.some(looksAdult)){
+        showSys("Adult-Link blockiert.");
+        return;
+      }
+
+      msgEl.value = '';
+      channel.publish(EVENT, { n: nick, t: text, ts: now });
+
+      // Local echo (feels instant)
+      appendMsg(nick, text, now);
+    }
+
+    connectBtn.addEventListener('click', connect);
+    disconnectBtn.addEventListener('click', disconnect);
+    sendBtn.addEventListener('click', send);
+    msgEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+  </script>
+</body>
+</html>
