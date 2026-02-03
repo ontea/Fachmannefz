@@ -15,6 +15,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 
+  <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+
+
   <style>
     /* ===== Light-Mode Lesbarkeit ===== */
     [data-theme="light"] body { color: rgba(15,23,42,0.92); }
@@ -1102,6 +1105,73 @@
       <div class="mt-3 text-white/60 text-xs">Tipp: Wenn du Lernstress hast: weniger Themen anzeigen, mehr Fokus.</div>
     </div>
   </div>
+
+  <section id="globalChat">
+  <h2>Global Chat</h2>
+  <div>
+    <input id="nick" placeholder="Nickname (optional)" />
+    <button id="connect">Verbinden</button>
+  </div>
+
+  <div id="status">offline</div>
+  <div id="log" style="height:240px;overflow:auto;border:1px solid #ddd;padding:10px;"></div>
+
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <input id="msg" placeholder="Nachricht…" style="flex:1;" />
+    <button id="send" disabled>Senden</button>
+  </div>
+</section>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const log = $("log"), status = $("status");
+  const nick = $("nick"), msg = $("msg");
+  const connectBtn = $("connect"), sendBtn = $("send");
+
+  nick.value = localStorage.getItem("chatNick") || "";
+
+  let realtime, channel, lastSent = 0;
+
+  function line(t){ log.innerHTML += t + "<br>"; log.scrollTop = log.scrollHeight; }
+
+  connectBtn.onclick = () => {
+    const n = (nick.value || "anon").trim().slice(0, 18);
+    localStorage.setItem("chatNick", n);
+
+    realtime = new Ably.Realtime({
+      authUrl: `/.netlify/functions/ably-token?clientId=${encodeURIComponent(n)}`
+    });
+
+    realtime.connection.on((s) => {
+      status.textContent = s.current;
+      if (s.current === "connected") sendBtn.disabled = false;
+    });
+
+    channel = realtime.channels.get("global-chat");
+    channel.subscribe((m) => {
+      const d = m.data || {};
+      line(`<b>${(d.n||"anon")}</b>: ${d.t||""}`);
+    });
+  };
+
+  sendBtn.onclick = () => {
+    if (!channel) return;
+    const now = Date.now();
+    if (now - lastSent < 1200) return; // mini anti-spam (clientseitig)
+    lastSent = now;
+
+    const n = (nick.value || "anon").trim().slice(0, 18);
+    const t = (msg.value || "").trim().slice(0, 240);
+    if (!t) return;
+
+    msg.value = "";
+    channel.publish("msg", { n, t, ts: now });
+  };
+
+  msg.addEventListener("keydown", (e) => { if (e.key === "Enter") sendBtn.onclick(); });
+})();
+</script>
 
   <!-- Sessions Modal -->
   <div id="sessionsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Sessions">
