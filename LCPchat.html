@@ -311,7 +311,7 @@
     const EVENT = "msg";
 
     // Optional hardcode (otherwise user enters key once; stored locally)
-    const ABLY_KEY_HARDCODED = "xN-IIg.FUeKQw:k3v8se1pulMbcVjXxLaKan-JxKvcQT7hOW-_YBjrpkg"; // <- wenn du willst: hier rein
+    const ABLY_KEY_HARDCODED = ""; // <- wenn du willst: hier rein
 
     const nickEl = document.getElementById('nick');
     const keyEl  = document.getElementById('ablyKey');
@@ -456,7 +456,7 @@
       localStorage.setItem('chatAblyKey', key);
 
       setState('verbinden…');
-      ably = new Ably.Realtime({ key, clientId: nick });
+      ably = new Ably.Realtime({ key, clientId: nick, echoMessages: false });
 
       ably.connection.on((stateChange) => {
         setState(stateChange.current);
