@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>StromPRO – Schaltungsrechner (offline, Serie/Parallel)</title>
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1220;
+      --card: rgba(255,255,255,.07);
+      --card2: rgba(255,255,255,.05);
+      --stroke: rgba(255,255,255,.12);
+      --stroke2: rgba(255,255,255,.18);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --muted2: rgba(255,255,255,.52);
+      --shadow: 0 12px 40px rgba(0,0,0,.35);
+      --r: 18px;
+      --r2: 14px;
+      --good: rgba(52,199,89,.95);
+      --bad: rgba(255,59,48,.95);
+      --warn: rgba(255,171,0,.95);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 700px at 15% 10%, rgba(0,113,227,.35), transparent 60%),
+        radial-gradient(900px 600px at 85% 0%, rgba(52,199,89,.18), transparent 60%),
+        radial-gradient(900px 600px at 65% 90%, rgba(255,171,0,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      min-height:100vh;
+      padding:18px;
+      padding-bottom:90px;
+    }
+    .wrap{max-width:1200px;margin:0 auto}
+    .top{
+      display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+      margin-bottom:14px;
+    }
+    h1{margin:0;font-size:28px;letter-spacing:-.02em}
+    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+    .bar{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 12px;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,.18);
+      display:inline-flex;align-items:center;gap:8px;
+      user-select:none;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.small{padding:8px 10px;font-size:12px}
+    .btn.icon{width:38px;height:38px;justify-content:center;padding:0}
+    .btn.ghost{background:transparent}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media (min-width: 980px){
+      .grid{grid-template-columns: 1.05fr .95fr;}
+    }
+    .card{
+      background: var(--card);
+      border:1px solid var(--stroke);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding:14px;
+      overflow:hidden;
+    }
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .chip{
+      background: var(--card2);
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      padding:8px 10px;
+      display:inline-flex;gap:8px;align-items:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .status{
+      font-weight:800;
+      color: var(--good);
+    }
+    .status.bad{color: var(--bad);}
+    .fields{
+      display:grid;grid-template-columns: 1fr 1fr;gap:10px;
+      margin-top:10px;
+    }
+    @media (min-width: 640px){
+      .fields{grid-template-columns: 1fr 1fr 1fr;}
+    }
+    label{font-size:12px;color:var(--muted)}
+    .inp{
+      width:100%;
+      border-radius: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      padding:10px 12px;
+      outline:none;
+    }
+    .inp:focus{border-color: var(--stroke2); box-shadow: 0 0 0 3px rgba(255,255,255,.06);}
+    .warn{
+      margin-top:10px;
+      border-radius: 14px;
+      padding:10px 12px;
+      border:1px solid rgba(255,171,0,.35);
+      background: rgba(255,171,0,.10);
+      color: rgba(255,255,255,.9);
+      display:none;
+    }
+    .warn.show{display:block}
+    .builder-title{margin-top:14px;font-size:14px;font-weight:900}
+    .hint{font-size:12px;color:var(--muted);margin-top:6px}
+
+    .stack{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .node{
+      background: rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
+      border-radius: 16px;
+      padding:10px;
+    }
+    .node-head{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .node-left{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .tag{
+      border-radius:999px;
+      padding:6px 10px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.12);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .mini-grid{display:grid;grid-template-columns: 1fr;gap:10px;margin-top:10px}
+    @media(min-width: 720px){
+      .mini-grid{grid-template-columns: 1fr 1fr 1fr;}
+    }
+    .branches{display:grid;grid-template-columns: 1fr;gap:10px;margin-top:10px}
+    @media(min-width: 760px){
+      .branches{grid-template-columns: 1fr 1fr;}
+    }
+    .branch-head{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .branch-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .sep{height:1px;background: rgba(255,255,255,.08);margin:10px 0}
+
+    .right-top{display:grid;grid-template-columns: 1fr;gap:10px}
+    @media(min-width: 640px){
+      .right-top{grid-template-columns: 1fr 1fr 1fr;}
+    }
+    .metric{background: rgba(255,255,255,.05); border:1px solid var(--stroke); border-radius:16px; padding:12px}
+    .metric .k{font-size:12px;color:var(--muted)}
+    .metric .v{font-size:22px;font-weight:900;margin-top:2px}
+    .schem{
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      margin:10px 0 12px;
+    }
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.10);text-align:left;vertical-align:top}
+    th{font-size:12px;color:var(--muted);font-weight:800}
+    td{font-size:13px}
+    .scroll{max-height:230px;overflow:auto}
+    .steps{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .step{
+      border-radius: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      padding:10px 12px;
+    }
+    .step h3{margin:0 0 6px;font-size:13px;font-weight:900}
+    .step .line{font-size:13px;color: rgba(255,255,255,.82); margin:2px 0}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .foot{
+      position:fixed;left:0;right:0;bottom:14px;
+      display:flex;justify-content:center;pointer-events:none;
+    }
+    .nav{
+      pointer-events:auto;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:999px;
+      padding:10px 12px;
+      display:flex;gap:10px;align-items:center;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+    }
+    .nav a{
+      color: var(--text); text-decoration:none;
+      padding:10px 12px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      display:inline-flex;gap:8px;align-items:center;
+      font-weight:800;font-size:13px;
+    }
+    .nav a.active{border-color: rgba(0,113,227,.55);}
+    .nav small{color:var(--muted);font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>StromPRO</h1>
+        <div class="sub">Offline‑Schaltungsrechner: <b>Serie</b> (Root) + <b>Parallelgruppen</b> (Zweige = Serie). Gesamtwerte, Einzelwerte, Lösungsweg.</div>
+      </div>
+      <div class="bar">
+        <button class="btn" data-action="add-root" data-r="2">＋ 2Ω</button>
+        <button class="btn" data-action="add-root" data-r="5">＋ 5Ω</button>
+        <button class="btn" data-action="add-root-custom">＋ Custom Ω</button>
+        <button class="btn" data-action="add-parallel">⫶ Parallelgruppe</button>
+        <button class="btn" data-action="reset">⟲ Reset</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <section class="card">
+        <div class="row">
+          <span class="chip">📅 <span id="date">–</span></span>
+          <span class="chip">🕒 <span id="time">–</span></span>
+          <span class="chip">⚡ U<sub>tot</sub>: <b><span id="vBadge">12.0</span> V</b></span>
+          <span class="chip">Status: <span id="status" class="status">bereit</span></span>
+        </div>
+
+        <div class="fields">
+          <div>
+            <label>Batteriespannung U<sub>tot</sub> (V)</label>
+            <input id="Vtot" class="inp" type="number" min="0" step="0.1" value="12">
+          </div>
+          <div>
+            <label>Rundung (Nachkommastellen)</label>
+            <input id="dp" class="inp" type="number" min="0" max="6" step="1" value="3">
+          </div>
+          <div>
+            <label>Hinweis</label>
+            <div class="tag">Reihenfolge: ↑/↓ (kein Drag, weil zuverlässig)</div>
+          </div>
+        </div>
+
+        <div id="warn" class="warn"></div>
+
+        <div class="builder-title">Schaltung (Root = Serie)</div>
+        <div class="hint">Parallelgruppe = Block in der Serie. In der Parallelgruppe: Zweige parallel, in jedem Zweig Widerstände in Serie.</div>
+
+        <div id="builder" class="stack"></div>
+      </section>
+
+      <!-- RIGHT -->
+      <section class="card">
+        <div class="right-top">
+          <div class="metric">
+            <div class="k">Gesamtwiderstand R<sub>tot</sub></div>
+            <div class="v"><span id="Rtot">–</span> Ω</div>
+          </div>
+          <div class="metric">
+            <div class="k">Gesamtstrom I<sub>tot</sub></div>
+            <div class="v"><span id="Itot">–</span> A</div>
+          </div>
+          <div class="metric">
+            <div class="k">Gesamtleistung P<sub>tot</sub></div>
+            <div class="v"><span id="Ptot">–</span> W</div>
+          </div>
+        </div>
+
+        <div class="schem">
+          <svg id="schematic" width="100%" viewBox="0 0 980 420" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+        <div style="font-weight:900;margin:6px 0 8px;">Einzelwerte pro Widerstand</div>
+        <div class="scroll node" style="padding:0">
+          <table>
+            <thead>
+              <tr>
+                <th>Bauteil</th>
+                <th>R (Ω)</th>
+                <th>U (V)</th>
+                <th>I (A)</th>
+                <th>P (W)</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+
+        <div style="font-weight:900;margin:14px 0 8px;">Lösungsweg</div>
+        <div id="steps" class="steps"></div>
+
+        <div class="hint">Nur Serie/Parallel‑reduzierbar (Schule). Brückenschaltungen brauchen Kirchhoff/Solver.</div>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="nav">
+      <a href="Index.html">🏠 Home</a>
+      <a href="#" class="active">⚡ Strom</a>
+      <small>offline</small>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ===== Date/Time =====
+  function tick(){
+    const now = new Date();
+    document.getElementById('date').textContent = now.toLocaleDateString('de-CH', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    document.getElementById('time').textContent = now.toLocaleTimeString('de-CH');
+  }
+  setInterval(tick, 1000); tick();
+
+  // ===== Model =====
+  const uid = () => Math.random().toString(36).slice(2,9);
+  const model = { root: [] }; // root = series array
+  function defaultRes(R){ return {type:'res', id:uid(), label:'R', R:Number(R)}; }
+  function defaultPar(){
+    return {
+      type:'par', id:uid(),
+      branches: [
+        {id:uid(), items:[defaultRes(2)]},
+        {id:uid(), items:[defaultRes(5)]},
+      ]
+    };
+  }
+
+  // ===== Utils =====
+  const $ = (id)=>document.getElementById(id);
+  function dp(){ return Math.max(0, Math.min(6, Number($('dp').value||3))); }
+  function Vtot(){ return Number($('Vtot').value||0); }
+  function round(x){ const p=Math.pow(10, dp()); return Math.round(x*p)/p; }
+  function esc(s){ return (s??'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+  function setStatus(ok, msg){
+    const el = $('status');
+    el.textContent = msg || (ok ? 'bereit' : 'Fehler');
+    el.classList.toggle('bad', !ok);
+  }
+  function warn(list){
+    const w = $('warn');
+    if (!list.length){ w.classList.remove('show'); w.innerHTML=''; return; }
+    w.classList.add('show');
+    w.innerHTML = '<b>Bitte fixen:</b><ul style="margin:6px 0 0; padding-left:18px;">' + list.map(x=>'<li>'+esc(x)+'</li>').join('') + '</ul>';
+  }
+
+  // ===== Compute: equivalent R =====
+  function R_of_branch(branch){
+    let s=0;
+    for (const it of branch.items){
+      const r=Number(it.R);
+      if (!(r>0)) return NaN;
+      s += r;
+    }
+    return s;
+  }
+  function R_of_block(block){
+    if (block.type==='res'){
+      const r=Number(block.R);
+      return (r>0)? r : NaN;
+    }
+    if (block.type==='par'){
+      let inv=0;
+      for (const b of block.branches){
+        const Rb = R_of_branch(b);
+        if (!isFinite(Rb) || !(Rb>0)) return NaN;
+        inv += 1/Rb;
+      }
+      return inv>0 ? 1/inv : NaN;
+    }
+    return NaN;
+  }
+  function R_total(){
+    let s=0;
+    for (const b of model.root){
+      const Rb = R_of_block(b);
+      if (!isFinite(Rb)) return NaN;
+      s += Rb;
+    }
+    return s;
+  }
+
+  function validate(){
+    const out=[];
+    if (!model.root.length) out.push('Root‑Serie ist leer. Füge mindestens einen Widerstand oder eine Parallelgruppe hinzu.');
+    model.root.forEach((blk, i)=>{
+      if (blk.type==='res'){
+        if (!(Number(blk.R)>0)) out.push(`Widerstand "${blk.label||blk.id}" hat ungültiges R (${blk.R}).`);
+      } else if (blk.type==='par'){
+        if (blk.branches.length<2) out.push(`Parallelgruppe ${blk.id}: mindestens 2 Zweige.`);
+        blk.branches.forEach((br, bi)=>{
+          if (!br.items.length) out.push(`Parallelgruppe ${blk.id}, Zweig ${bi+1} ist leer.`);
+          br.items.forEach(it=>{
+            if (!(Number(it.R)>0)) out.push(`Zweig ${bi+1}: Widerstand "${it.label||it.id}" ungültig (${it.R}).`);
+          });
+        });
+      }
+    });
+    return out;
+  }
+
+  // ===== Solve per resistor =====
+  // returns array {id,label,R,U,I,P, scope}
+  function solve(){
+    const V = Vtot();
+    const Rt = R_total();
+    if (!isFinite(Rt) || !(Rt>0)) return {Rt, It:NaN, Pt:NaN, rows:[], steps:[]};
+    const It = V / Rt;
+    const Pt = V * It;
+
+    const rows=[];
+    const steps=[];
+
+    steps.push({title:'1) Gegeben', lines:[`U_tot = <b>${round(V)}</b> V`]});
+
+    // Reduce each parallel group
+    model.root.forEach((blk)=>{
+      if (blk.type!=='par') return;
+      const lines=[];
+      const branchRs=[];
+      blk.branches.forEach((br, idx)=>{
+        const terms = br.items.map(it => `${esc(it.label||it.id)}(${round(Number(it.R))}Ω)`).join(' + ') || '(leer)';
+        const Rb = R_of_branch(br);
+        branchRs.push(Rb);
+        lines.push(`Zweig ${idx+1}: R_Z${idx+1} = ${terms} = <b>${round(Rb)}</b> Ω`);
+      });
+      const invVal = branchRs.reduce((a,rb)=>a+1/rb,0);
+      const Rp = R_of_block(blk);
+      lines.push(`1/R_P = Σ(1/R_Z) = <b>${round(invVal)}</b> 1/Ω`);
+      lines.push(`R_P = 1 / (1/R_P) = <b>${round(Rp)}</b> Ω`);
+      steps.push({title:`2) Parallelgruppe reduzieren (ID ${blk.id})`, lines});
+    });
+
+    steps.push({title:'3) Gesamtwiderstand', lines:[
+      `R_tot = ΣR_Block = <b>${round(Rt)}</b> Ω`
+    ]});
+    steps.push({title:'4) Gesamtstrom', lines:[
+      `I_tot = U_tot / R_tot = ${round(V)} / ${round(Rt)} = <b>${round(It)}</b> A`
+    ]});
+
+    // Voltage per series block
+    const blockDrops=[];
+    model.root.forEach((blk)=>{
+      const Rb = R_of_block(blk);
+      const Ub = It * Rb;
+      if (blk.type==='res'){
+        blockDrops.push(`U(${esc(blk.label||blk.id)}) = I_tot · R = ${round(It)} · ${round(Rb)} = <b>${round(Ub)}</b> V`);
+      } else {
+        blockDrops.push(`U_P(${blk.id}) = I_tot · R_P = ${round(It)} · ${round(Rb)} = <b>${round(Ub)}</b> V`);
+      }
+    });
+    steps.push({title:'5) Spannung an jedem Serien‑Block', lines:blockDrops});
+
+    // Detailed per resistor
+    model.root.forEach((blk)=>{
+      const Rb = R_of_block(blk);
+      const Ub = It * Rb;
+
+      if (blk.type==='res'){
+        const R = Number(blk.R);
+        const I = It;
+        const U = Ub;
+        rows.push({id:blk.id, label:blk.label||blk.id, R, U, I, P:U*I});
+      } else if (blk.type==='par'){
+        const lines=[];
+        lines.push(`In Parallel gilt: U ist in allen Zweigen gleich.`);
+        lines.push(`U_P(${blk.id}) = <b>${round(Ub)}</b> V`);
+
+        let sumI=0;
+        blk.branches.forEach((br, bi)=>{
+          const Rbr = R_of_branch(br);
+          const Ibr = Ub / Rbr;
+          sumI += Ibr;
+          lines.push(`<span class="mono">Zweig ${bi+1}</span>: I_Z${bi+1} = U_P / R_Z${bi+1} = ${round(Ub)} / ${round(Rbr)} = <b>${round(Ibr)}</b> A`);
+
+          br.items.forEach((it)=>{
+            const R = Number(it.R);
+            const U = Ibr * R;
+            const I = Ibr;
+            rows.push({id:it.id, label:(it.label||it.id), R, U, I, P:U*I});
+            lines.push(`• ${esc(it.label||it.id)}: U = I_Z${bi+1} · R = ${round(Ibr)} · ${round(R)} = <b>${round(U)}</b> V`);
+          });
+        });
+        lines.push(`Kontrolle: ΣI_Z = <b>${round(sumI)}</b> A ≈ I_tot (${round(It)} A)`);
+        steps.push({title:`6) Zweig‑Ströme (Parallelgruppe ${blk.id})`, lines});
+      }
+    });
+
+    steps.push({title:'7) Kontrolle (Leistung)', lines:[
+      `P_tot = U_tot · I_tot = ${round(V)} · ${round(It)} = <b>${round(Pt)}</b> W`
+    ]});
+
+    return {Rt, It, Pt, rows, steps};
+  }
+
+  // ===== Draw simple SVG =====
+  function draw(){
+    const svg = $('schematic');
+    svg.innerHTML='';
+    const W=980, H=420, margin=40;
+    const stroke='rgba(255,255,255,.75)';
+    const faint='rgba(255,255,255,.18)';
+    const txt='rgba(255,255,255,.92)';
+    const boxFill='rgba(255,255,255,.06)';
+    const boxStroke='rgba(255,255,255,.16)';
+
+    const ns='http://www.w3.org/2000/svg';
+    const line=(x1,y1,x2,y2, s=stroke, w=3)=>{
+      const l=document.createElementNS(ns,'line');
+      l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+      l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+      l.setAttribute('stroke',s); l.setAttribute('stroke-width',w);
+      l.setAttribute('stroke-linecap','round');
+      svg.appendChild(l);
+    };
+    const rect=(x,y,w,h, r=12)=>{
+      const p=document.createElementNS(ns,'rect');
+      p.setAttribute('x',x); p.setAttribute('y',y);
+      p.setAttribute('width',w); p.setAttribute('height',h);
+      p.setAttribute('rx',r);
+      p.setAttribute('fill',boxFill);
+      p.setAttribute('stroke',boxStroke);
+      p.setAttribute('stroke-width',2);
+      svg.appendChild(p);
+    };
+    const text=(x,y,t, size=14, weight=800, anchor='middle')=>{
+      const tt=document.createElementNS(ns,'text');
+      tt.setAttribute('x',x); tt.setAttribute('y',y);
+      tt.setAttribute('fill',txt);
+      tt.setAttribute('font-size',size);
+      tt.setAttribute('font-weight',weight);
+      tt.setAttribute('text-anchor',anchor);
+      tt.textContent=t;
+      svg.appendChild(tt);
+    };
+
+    const yMid=H/2;
+    // battery
+    line(margin, yMid-40, margin, yMid+40);
+    line(margin+14, yMid-26, margin+14, yMid+26);
+    const V = Vtot();
+    text(margin+30, yMid-50, 'U', 14, 900, 'start');
+    text(margin+30, yMid-30, (Math.round(V*10)/10).toFixed(1)+' V', 12, 800, 'start');
+
+    const startX=margin+80;
+    const endX=W-margin;
+    line(margin+14, yMid, startX, yMid);
+
+    const blocks=model.root;
+    const n=Math.max(1, blocks.length);
+    const gap=18;
+    const available=endX-startX;
+    const blockW=Math.max(150, Math.min(230, (available - gap*(n-1))/n));
+    const blockH=70;
+
+    let x=startX;
+    blocks.forEach((blk)=>{
+      if (blk.type==='res'){
+        line(x, yMid, x+blockW, yMid, faint, 2);
+        rect(x+10, yMid-blockH/2, blockW-20, blockH, 14);
+        text(x+blockW/2, yMid-6, blk.label||'R', 14, 900);
+        text(x+blockW/2, yMid+16, (Number(blk.R)||0)+' Ω', 12, 800);
+      } else {
+        rect(x+6, yMid-120, blockW-12, 240, 18);
+        text(x+blockW/2, yMid-130, 'Parallel', 12, 900);
+        const railL=x+20, railR=x+blockW-20;
+        line(railL, yMid-90, railL, yMid+90);
+        line(railR, yMid-90, railR, yMid+90);
+        line(x, yMid, railL, yMid);
+        line(railR, yMid, x+blockW, yMid);
+
+        const m=blk.branches.length;
+        const topY=yMid-70;
+        const step=(m===1)?0:(140/(m-1));
+        for (let i=0;i<m;i++){
+          const by=topY+i*step;
+          line(railL, by, railL+20, by);
+          line(railR-20, by, railR, by);
+
+          const items=blk.branches[i].items;
+          const innerW=(railR-railL)-80;
+          const innerX=railL+40;
+          const innerGap=10;
+          const k=Math.max(1, items.length);
+          const miniW=Math.max(70, Math.min(120, (innerW - innerGap*(k-1))/k));
+          let bx=innerX;
+          items.forEach((it)=>{
+            rect(bx, by-16, miniW, 32, 10);
+            text(bx+miniW/2, by+5, it.label||'R', 10, 900);
+            text(bx+miniW/2, by+18, (Number(it.R)||0)+'Ω', 9, 800);
+            bx += miniW + innerGap;
+          });
+        }
+      }
+      x += blockW + gap;
+    });
+
+    line(x-gap, yMid, endX, yMid);
+  }
+
+  // ===== Render UI (event delegation, no re-binding needed) =====
+  function render(){
+    $('vBadge').textContent = (Math.round(Vtot()*10)/10).toFixed(1);
+
+    const v = validate();
+    warn(v);
+    setStatus(!v.length, v.length ? 'Fehler' : 'bereit');
+
+    const {Rt, It, Pt, rows, steps} = solve();
+    $('Rtot').textContent = isFinite(Rt) ? round(Rt) : '–';
+    $('Itot').textContent = isFinite(It) ? round(It) : '–';
+    $('Ptot').textContent = isFinite(Pt) ? round(Pt) : '–';
+
+    // Builder
+    const b = $('builder');
+    b.innerHTML = '';
+    if (!model.root.length){
+      const empty = document.createElement('div');
+      empty.className = 'node';
+      empty.innerHTML = '<div class="tag">leer</div><div class="hint" style="margin-top:8px">Oben Buttons nutzen: +2Ω / +5Ω / Parallelgruppe</div>';
+      b.appendChild(empty);
+    }
+
+    model.root.forEach((blk, idx)=>{
+      const node = document.createElement('div');
+      node.className = 'node';
+      node.dataset.kind = blk.type;
+      node.dataset.id = blk.id;
+
+      const head = document.createElement('div');
+      head.className = 'node-head';
+
+      const left = document.createElement('div');
+      left.className = 'node-left';
+      left.innerHTML = blk.type==='res'
+        ? `<span class="tag">Widerstand</span><span class="chip"># ${esc(blk.id)}</span>`
+        : `<span class="tag">Parallelgruppe</span><span class="chip"># ${esc(blk.id)}</span><span class="chip">${blk.branches.length} Zweige</span>`;
+
+      const actions = document.createElement('div');
+      actions.className = 'row';
+      actions.innerHTML = `
+        <button class="btn icon" title="hoch" data-action="move-root" data-id="${blk.id}" data-dir="-1">↑</button>
+        <button class="btn icon" title="runter" data-action="move-root" data-id="${blk.id}" data-dir="1">↓</button>
+        ${blk.type==='par' ? `<button class="btn small" data-action="add-branch" data-id="${blk.id}">＋ Zweig</button>` : ''}
+        <button class="btn icon" title="löschen" data-action="del-root" data-id="${blk.id}">🗑️</button>
+      `;
+
+      head.appendChild(left);
+      head.appendChild(actions);
+      node.appendChild(head);
+
+      if (blk.type==='res'){
+        const g = document.createElement('div');
+        g.className = 'mini-grid';
+        g.innerHTML = `
+          <div>
+            <label>Name (z.B. R1)</label>
+            <input class="inp" data-action="edit-res" data-id="${blk.id}" data-field="label" value="${esc(blk.label||'')}">
+          </div>
+          <div>
+            <label>Widerstand R (Ω)</label>
+            <input class="inp" type="number" min="0.001" step="0.001" data-action="edit-res" data-id="${blk.id}" data-field="R" value="${Number(blk.R)}">
+          </div>
+          <div>
+            <label>Quick</label>
+            <div class="row" style="margin-top:6px">
+              <button class="btn small" data-action="set-res" data-id="${blk.id}" data-r="2">2Ω</button>
+              <button class="btn small" data-action="set-res" data-id="${blk.id}" data-r="5">5Ω</button>
+            </div>
+          </div>
+        `;
+        node.appendChild(g);
+      } else {
+        // branches
+        const brWrap = document.createElement('div');
+        brWrap.className = 'branches';
+
+        blk.branches.forEach((br, bi)=>{
+          const brCard = document.createElement('div');
+          brCard.className = 'node';
+          brCard.dataset.branch = br.id;
+
+          const brHead = document.createElement('div');
+          brHead.className = 'branch-head';
+
+          const l = document.createElement('div');
+          l.className = 'tag';
+          l.textContent = `Zweig ${bi+1}`;
+
+          const brActs = document.createElement('div');
+          brActs.className = 'branch-actions';
+          brActs.innerHTML = `
+            <button class="btn small" data-action="add-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-r="2">＋2Ω</button>
+            <button class="btn small" data-action="add-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-r="5">＋5Ω</button>
+            <button class="btn small" data-action="add-branch-res-custom" data-par="${blk.id}" data-branch="${br.id}">＋Custom</button>
+            <button class="btn small ghost" data-action="del-branch" data-par="${blk.id}" data-branch="${br.id}">Zweig löschen</button>
+          `;
+
+          brHead.appendChild(l);
+          brHead.appendChild(brActs);
+          brCard.appendChild(brHead);
+
+          if (!br.items.length){
+            const emp = document.createElement('div');
+            emp.className = 'hint';
+            emp.textContent = '(leer)';
+            brCard.appendChild(emp);
+          }
+
+          br.items.forEach((it, ii)=>{
+            const item = document.createElement('div');
+            item.className = 'node';
+            item.style.padding = '10px';
+            item.innerHTML = `
+              <div class="node-head">
+                <div class="node-left">
+                  <span class="tag">Widerstand</span>
+                  <span class="chip"># ${esc(it.id)}</span>
+                </div>
+                <div class="row">
+                  <button class="btn icon" title="hoch" data-action="move-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}" data-dir="-1">↑</button>
+                  <button class="btn icon" title="runter" data-action="move-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}" data-dir="1">↓</button>
+                  <button class="btn icon" title="löschen" data-action="del-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}">🗑️</button>
+                </div>
+              </div>
+
+              <div class="mini-grid" style="margin-top:10px">
+                <div>
+                  <label>Name</label>
+                  <input class="inp" data-action="edit-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}" data-field="label" value="${esc(it.label||'')}">
+                </div>
+                <div>
+                  <label>R (Ω)</label>
+                  <input class="inp" type="number" min="0.001" step="0.001" data-action="edit-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}" data-field="R" value="${Number(it.R)}">
+                </div>
+                <div>
+                  <label>Quick</label>
+                  <div class="row" style="margin-top:6px">
+                    <button class="btn small" data-action="set-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}" data-r="2">2Ω</button>
+                    <button class="btn small" data-action="set-branch-res" data-par="${blk.id}" data-branch="${br.id}" data-id="${it.id}" data-r="5">5Ω</button>
+                  </div>
+                </div>
+              </div>
+            `;
+            brCard.appendChild(item);
+          });
+
+          brWrap.appendChild(brCard);
+        });
+
+        node.appendChild(brWrap);
+      }
+
+      b.appendChild(node);
+    });
+
+    // Table rows
+    const tbody = $('rows');
+    tbody.innerHTML = '';
+    rows.forEach(rr=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><b>${esc(rr.label)}</b><div style="color:var(--muted);font-size:12px">${esc(rr.id)}</div></td>
+        <td>${round(rr.R)}</td>
+        <td>${round(rr.U)}</td>
+        <td>${round(rr.I)}</td>
+        <td>${round(rr.P)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Steps
+    const s = $('steps');
+    s.innerHTML = '';
+    steps.forEach(st=>{
+      const box = document.createElement('div');
+      box.className = 'step';
+      box.innerHTML = `<h3>${st.title}</h3>` + st.lines.map(l=>`<div class="line">${l}</div>`).join('');
+      s.appendChild(box);
+    });
+
+    draw();
+  }
+
+  // ===== Actions (single event listener) =====
+  function findRoot(id){ return model.root.find(x=>x.id===id); }
+  function moveInArray(arr, idx, dir){
+    const j=idx+dir;
+    if (j<0 || j>=arr.length) return;
+    const t=arr[idx]; arr[idx]=arr[j]; arr[j]=t;
+  }
+
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const act = btn.dataset.action;
+
+    if (act==='add-root'){
+      model.root.push({type:'res', id:uid(), label:'R', R:Number(btn.dataset.r)});
+      render(); return;
+    }
+    if (act==='add-root-custom'){
+      const x = prompt('Widerstand in Ω?', '10');
+      if (!x) return;
+      const v = Number(x);
+      if (!(v>0)) return;
+      model.root.push({type:'res', id:uid(), label:'R', R:v});
+      render(); return;
+    }
+    if (act==='add-parallel'){
+      model.root.push(defaultPar());
+      render(); return;
+    }
+    if (act==='reset'){
+      model.root.length=0;
+      render(); return;
+    }
+    if (act==='move-root'){
+      const id = btn.dataset.id;
+      const dir = Number(btn.dataset.dir);
+      const idx = model.root.findIndex(x=>x.id===id);
+      if (idx>=0) moveInArray(model.root, idx, dir);
+      render(); return;
+    }
+    if (act==='del-root'){
+      const id = btn.dataset.id;
+      const idx = model.root.findIndex(x=>x.id===id);
+      if (idx>=0) model.root.splice(idx,1);
+      render(); return;
+    }
+    if (act==='set-res'){
+      const id = btn.dataset.id;
+      const r = Number(btn.dataset.r);
+      const it = findRoot(id);
+      if (it && it.type==='res'){ it.R=r; }
+      render(); return;
+    }
+    if (act==='add-branch'){
+      const p = findRoot(btn.dataset.id);
+      if (p && p.type==='par'){
+        p.branches.push({id:uid(), items:[defaultRes(5)]});
+        render(); return;
+      }
+    }
+    if (act==='del-branch'){
+      const p = findRoot(btn.dataset.par);
+      if (!p || p.type!=='par') return;
+      if (p.branches.length<=2) { setStatus(false,'min. 2 Zweige'); return; }
+      const idx = p.branches.findIndex(b=>b.id===btn.dataset.branch);
+      if (idx>=0) p.branches.splice(idx,1);
+      render(); return;
+    }
+    if (act==='add-branch-res'){
+      const p = findRoot(btn.dataset.par);
+      if (!p || p.type!=='par') return;
+      const br = p.branches.find(b=>b.id===btn.dataset.branch);
+      if (!br) return;
+      br.items.push({type:'res', id:uid(), label:'R', R:Number(btn.dataset.r)});
+      render(); return;
+    }
+    if (act==='add-branch-res-custom'){
+      const p = findRoot(btn.dataset.par);
+      if (!p || p.type!=='par') return;
+      const br = p.branches.find(b=>b.id===btn.dataset.branch);
+      if (!br) return;
+      const x = prompt('Widerstand in Ω?', '10');
+      if (!x) return;
+      const v = Number(x);
+      if (!(v>0)) return;
+      br.items.push({type:'res', id:uid(), label:'R', R:v});
+      render(); return;
+    }
+    if (act==='move-branch-res'){
+      const p = findRoot(btn.dataset.par);
+      if (!p || p.type!=='par') return;
+      const br = p.branches.find(b=>b.id===btn.dataset.branch);
+      if (!br) return;
+      const idx = br.items.findIndex(x=>x.id===btn.dataset.id);
+      if (idx>=0) moveInArray(br.items, idx, Number(btn.dataset.dir));
+      render(); return;
+    }
+    if (act==='del-branch-res'){
+      const p = findRoot(btn.dataset.par);
+      if (!p || p.type!=='par') return;
+      const br = p.branches.find(b=>b.id===btn.dataset.branch);
+      if (!br) return;
+      const idx = br.items.findIndex(x=>x.id===btn.dataset.id);
+      if (idx>=0) br.items.splice(idx,1);
+      render(); return;
+    }
+    if (act==='set-branch-res'){
+      const p = findRoot(btn.dataset.par);
+      if (!p || p.type!=='par') return;
+      const br = p.branches.find(b=>b.id===btn.dataset.branch);
+      if (!br) return;
+      const it = br.items.find(x=>x.id===btn.dataset.id);
+      if (!it) return;
+      it.R = Number(btn.dataset.r);
+      render(); return;
+    }
+  });
+
+  document.addEventListener('input', (e)=>{
+    const el = e.target;
+    if (!(el instanceof HTMLInputElement)) return;
+
+    if (el.id==='Vtot' || el.id==='dp'){
+      render(); return;
+    }
+
+    const act = el.dataset.action;
+    if (act==='edit-res'){
+      const it = findRoot(el.dataset.id);
+      if (!it || it.type!=='res') return;
+      if (el.dataset.field==='label') it.label = el.value.slice(0,20);
+      if (el.dataset.field==='R') it.R = Number(el.value);
+      render(); return;
+    }
+    if (act==='edit-branch-res'){
+      const p = findRoot(el.dataset.par);
+      if (!p || p.type!=='par') return;
+      const br = p.branches.find(b=>b.id===el.dataset.branch);
+      if (!br) return;
+      const it = br.items.find(x=>x.id===el.dataset.id);
+      if (!it) return;
+      if (el.dataset.field==='label') it.label = el.value.slice(0,20);
+      if (el.dataset.field==='R') it.R = Number(el.value);
+      render(); return;
+    }
+  });
+
+  // ===== Init example =====
+  model.root.push({type:'res', id:uid(), label:'R1', R:2});
+  model.root.push(defaultPar());
+  model.root.push({type:'res', id:uid(), label:'R4', R:5});
+  render();
+})();
+</script>
+</body>
+</html>
